@@ -100,6 +100,12 @@ int main(int arg_count, char* arg_values[]) {
 	rs.GF = &gf;
 	InitRS2(rs_first_root, parity_size, &rs);
 
+	printf("\r\nRS Genpoly: ");
+	for(int i = 0; i < rs.NumRoots + 1; i++){
+		printf("%i ", rs.Genpoly[i]);
+	}
+	printf("\r\n");
+
 	uint16_t original_message[MAX_BUFFER];
 	uint16_t error_vector[MAX_BUFFER];
 	uint16_t corrupt_message[MAX_BUFFER];
