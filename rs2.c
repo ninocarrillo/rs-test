@@ -20,7 +20,7 @@ void InitRS2(int16_t first_root, int16_t num_roots, RS2_def_struct *rs) {
         factorpoly[0] = gf2_pow(i, rs->GF);
         gf2_conv(&rs->Genpoly[0], i + 1 - first_root, &factorpoly[0], 2, rs->GF);
     }
-    rs->MinimumErrorDistance = 1;
+    rs->MinimumErrorDistance = 0;
 }
 
 void RSEncode16(uint16_t *message, int16_t block_size, RS2_def_struct *rs) {
@@ -166,7 +166,8 @@ int16_t RSDecode16(uint16_t *data_block, int16_t block_size, RS2_def_struct *rs)
             
 		}
 	}
-        if (rs->ErrorCount <= ((rs->NumRoots / 2) - rs->MinimumErrorDistance)) {
+		if(1) {
+        //if (rs->ErrorCount <= ((rs->NumRoots / 2) - rs->MinimumErrorDistance)) {
         // Forney algorithm to determine error values
         // first calculate omega, the error magnitude polynomial
         for (i = 0; i < rs->ErrorCount; i++) {
