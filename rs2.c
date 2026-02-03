@@ -171,9 +171,9 @@ int16_t RSDecode16(uint16_t *data_block, int16_t block_size, RS2_def_struct *rs)
         // Forney algorithm to determine error values
         // first calculate omega, the error magnitude polynomial
         for (i = 0; i < rs->ErrorCount; i++) {
-            correction_poly[i] = syndromes[rs->FirstRoot + i];
+            correction_poly[i] = syndromes[/*rs->FirstRoot + */i];
             for (j = 1; j <= i; j++) {
-                correction_poly[i] = correction_poly[i] ^ gf2_mul(syndromes[rs->FirstRoot + i - j], error_locator[j], rs->GF);
+                correction_poly[i] = correction_poly[i] ^ gf2_mul(syndromes[/*rs->FirstRoot + */i - j], error_locator[j], rs->GF);
             }
         }
         for (i = 0; i < rs->ErrorCount; i++) { // compute an error value for each error location
