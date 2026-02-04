@@ -11,7 +11,7 @@
 #include "stdint.h"
 
 // Change to suit your application. Bigger = more memory used!
-#define MAX_GF_BITS 8
+#define MAX_GF_BITS 10
 
 // Don't change below this line.
 // MAX_FIELD_SIZE controls how much memory is allocated for tables.
@@ -21,10 +21,11 @@ typedef struct {
     int Power;
     int GenPoly;
     int Order;
-    uint16_t LFSR;
-    uint8_t Table[MAX_FIELD_SIZE - 1];
-    uint8_t Index[MAX_FIELD_SIZE];
-    uint8_t Inverse[MAX_FIELD_SIZE];
+    int LFSR;
+    int Mask;
+    int Table[MAX_FIELD_SIZE - 1];
+    int Index[MAX_FIELD_SIZE];
+    int Inverse[MAX_FIELD_SIZE];
 } GF2_def_struct;
 
 #endif	/* GF2_DEF_STRUCT_H */

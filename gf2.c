@@ -1,12 +1,12 @@
 #include "gf2.h"
+#include <stdio.h>
 
 void lfsr_step(GF2_def_struct *gf) {
 // utilize Galois configuration to implement LFSR
-   unsigned bit0;
-   bit0 = gf->LFSR & 1; // save the feedback bit
+   int feedback = gf->LFSR & (gf->GenPoly); // save the feedback bit
    gf->LFSR >>= 1; // shift memory register right one bit
-   if (bit0) { // if the feedback bit is one
-      gf->LFSR ^= (-1) & (gf->GenPoly >> 1); // then XOR the tapped bits
+   if (feedback & 1) { // if the feedback bit is one
+      gf->LFSR ^= (gf->GenPoly >> 1); // then XOR the tapped bits
    }
    return;
 }
@@ -28,36 +28,41 @@ uint16_t gf2_inv(uint16_t i, GF2_def_struct *gf) {
 }
 
 int InitGF2(int genpoly, GF2_def_struct *gf) {
-
+	if (!(genpoly & 1)) {
+		// Generator polynomial must be odd.
+		return(-1);
+	}
 	gf->GenPoly = genpoly;
 	gf->Order = 1;
 	gf->Power = 0;
 	while ((gf->Order<<1) < gf->GenPoly) {
-		gf->Order <<= 1;
+		gf->Order<<= 1;
 		gf->Power++;
 	}
-
+	gf->Mask = gf->Order - 1;
     // generate the field table and index
     int status = 0;
     gf->LFSR = 1; // start with GF element a^0
     for (int i = gf->Order - 2; i >= 0; i--) {
         lfsr_step(gf);
-        gf->Table[i] = gf->LFSR;
-        gf->Index[gf->LFSR] = i;
+        gf->Table[i & gf->Mask] = gf->LFSR;
+        gf->Index[gf->LFSR & gf->Mask] = i;
         if ((gf->LFSR == 1) && (i > 0)) {
             status++; // number of times sequence repeated during generation
         }
-    }  
-    gf->Index[0] = 0;
-    // generate the inverse table
-    gf->Inverse[0] = 0;
-    for (int i = 1; i < gf->Order; i++) {
-        int j = 1;
-        while (gf2_mul(i, j, gf) != 1) {
-            j++;
-        }
-        gf->Inverse[i] = j;
     }
+    if (status == 0) {
+	    gf->Index[0] = 0;
+	    // generate the inverse table
+	    gf->Inverse[0] = 0;
+	    for (int i = 1; i < gf->Order; i++) {
+	        int j = 1;
+	        while (gf2_mul(i, j, gf) != 1) {
+	            j++;
+	        }
+	        gf->Inverse[i] = j;
+	    }
+	}
     return status;
 }
 
@@ -65,13 +70,13 @@ int gf2_mul(int a, int b, GF2_def_struct *gf) {
 	if ((a == 0) | (b == 0)) {
 		return 0;
 	}
-	a = gf->Index[a];
-	b = gf->Index[b];
+	a = gf->Index[a & gf->Mask];
+	b = gf->Index[b & gf->Mask];
 	a = a + b;
-	while (a > (gf->Order - 2)) {
+	if (a > (gf->Order - 2)) {
 		a = a - (gf->Order - 1);
 	}
-	return gf->Table[a];
+	return gf->Table[a & gf->Mask];
 }
 
 int gf2_div(int a_arg, int b_arg, GF2_def_struct *gf) {

@@ -75,6 +75,8 @@ int main(int arg_count, char* arg_values[]) {
 	int parity_size = block_size - message_size;
 	int rs_first_root = atoi(arg_values[4]);
 	int run_count = atoi(arg_values[5]);
+
+	printf("\r\nSize of int variable is %li bits.", sizeof(int)*8);
 	
 	// Initialize Galois Field.
 	GF2_def_struct gf;
@@ -84,8 +86,13 @@ int main(int arg_count, char* arg_values[]) {
 	// 	printf("%i ", gf.Table[i]);
 	// }
 	if (gf_status > 0) {
-		printf("\r\nGalois Field generator polynomial is not primitive, field repeated %i times.", gf_status);
+		printf("\r\nGalois Field generator polynomial is not irreducible, field repeated %i times.", gf_status);
 		return(-1);
+	} else if (gf_status < 0) {
+		printf("\r\nGalois Field generator polynomial is even, must be odd.");
+		return(-1);
+	} else {
+		printf("\r\nGalois Field generator polynomial is irreducible.");
 	}
 	printf("\r\nGalois Field order: %i", gf.Order);
 	printf("\r\nGalois Field power: %i", gf.Power);
@@ -124,14 +131,13 @@ int main(int arg_count, char* arg_values[]) {
 		undetected_failures[i] = 0;
 	}
 
-
+	printf("\r\nStarting %i runs.\r\n", parity_size * run_count);
 	int master_count = 1;
 	
 	for (int error_count = 1; error_count <= parity_size; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
-			printf("\r%i", master_count++);
 			// printf("\r\nError Count %i, Run %i, ", error_count, run_number);
-
+			printf("\r%i", master_count++);
 			// Generate a random message to encode.
 			GenRandomMessage(original_message, gf.Order - 1, message_size);
 			// printf("\r\nMessage:");
