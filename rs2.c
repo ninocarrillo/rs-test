@@ -98,7 +98,7 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 				next_error_locator[i] = error_locator[i] ^ GF2Mul(e, correction_poly[i], rs->GF);
 			}
             // and update the value of C
-			e = gf2_inv(e, rs->GF);
+			e = GF2Inv(e, rs->GF);
 			for (i = 0; i <= rs->NumRoots / 2; i++) {		// need to refine loop limit t, could be based on L?
 				correction_poly[i] = GF2Mul(error_locator[i], e, rs->GF);
 			}

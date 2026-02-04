@@ -22,7 +22,7 @@ int GF2Log(int i, GF2_def_struct *gf) {
     return gf->Index[i & gf->Mask];
 }
 
-int gf2_inv(int i, GF2_def_struct *gf) {
+int GF2Inv(int i, GF2_def_struct *gf) {
     return gf->Inverse[i & gf->Mask];
 }
 

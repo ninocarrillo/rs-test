@@ -52,8 +52,8 @@ int GF2Pow(int, GF2_def_struct*);
 // Returns log base <field primitive> (2) of Arg.
 int GF2Log(int, GF2_def_struct*);
 
-// gf2_inv
+// GF2Inv
 // Returns 1/Arg.
-int gf2_inv(int, GF2_def_struct*);
+int GF2Inv(int, GF2_def_struct*);
 
 #endif	/* GF2_H */
