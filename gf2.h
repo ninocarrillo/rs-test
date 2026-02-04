@@ -8,7 +8,6 @@
 #ifndef GF2_H
 #define	GF2_H
 
-#include "stdint.h"
 #include "gf2_def_struct.h"
 
 // init_gf2
