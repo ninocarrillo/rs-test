@@ -142,41 +142,41 @@ int main(int arg_count, char* arg_values[]) {
 	
 	for (int error_count = 1; error_count <= parity_size; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
-			printf("\r\n\nError Count %i, Run %i, ", error_count, run_number);
-			//printf("\r%i", master_count++);
+			// printf("\r\n\nError Count %i, Run %i, ", error_count, run_number);
+			printf("\r%i", master_count++);
 			// Generate a random message to encode.
 			GenRandomMessage(original_message, gf.Order - 1, message_size);
-			printf("\r\nMessage:");
-			for (int i = 0; i < message_size; i++) {
-				printf(" %lX", original_message[i]);
-			}
+			// printf("\r\nMessage:");
+			// for (int i = 0; i < message_size; i++) {
+				// printf(" %lX", original_message[i]);
+			// }
 			// Encode message in Reed Solomon block.
 			RSEncode(original_message, message_size, &rs);
-			printf("\r\nEncodedMessage:");
-			for (int i = 0; i < block_size; i++) {
-				printf(" %lX", original_message[i]);
-			}
+			// printf("\r\nEncodedMessage:");
+			// for (int i = 0; i < block_size; i++) {
+				// printf(" %lX", original_message[i]);
+			// }
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
-			printf("\r\nError Vector:");
-			for (int i = 0; i < block_size; i++) {
-				printf(" %lX", error_vector[i]);
-			}
+			// printf("\r\nError Vector:");
+			// for (int i = 0; i < block_size; i++) {
+				// printf(" %lX", error_vector[i]);
+			// }
 
 			CombineVectors(original_message, error_vector, corrupt_message, block_size);
-			printf("\r\nCorrupt Message:");
-			for (int i = 0; i < block_size; i++) {
-				printf(" %lX", corrupt_message[i]);
-			}
+			// printf("\r\nCorrupt Message:");
+			// for (int i = 0; i < block_size; i++) {
+				// printf(" %lX", corrupt_message[i]);
+			// }
 
 			int corrected_count = RSDecode(corrupt_message, block_size, &rs);
-			printf("\r\nCorrected %i errors in message:", corrected_count);
-			for (int i = 0; i < block_size; i++) {
-				printf(" %lX", corrupt_message[i]);
-			}
+			// printf("\r\nCorrected %i errors in message:", corrected_count);
+			// for (int i = 0; i < block_size; i++) {
+				// printf(" %lX", corrupt_message[i]);
+			// }
 
 			int errors = CompareVectors(corrupt_message, original_message, block_size);
-			printf("\r\nBlock size: %i, Errors: %i", block_size, errors);
+			// printf("\r\nBlock size: %i, Errors: %i", block_size, errors);
 			if (errors > 0) {
 				failures[error_count - 1]++;
 				if (corrected_count >= 0) {
@@ -184,10 +184,10 @@ int main(int arg_count, char* arg_values[]) {
 				}
 			} else {
 				successes[error_count - 1]++;
-				printf("\r\nSuccessful message:", corrected_count);
-				for (int i = 0; i < block_size; i++) {
-					printf(" %lX,%lX", corrupt_message[i], original_message[i]);
-				}				
+				// printf("\r\nSuccessful message:", corrected_count);
+				// for (int i = 0; i < block_size; i++) {
+					// printf(" %lX,%lX", corrupt_message[i], original_message[i]);
+				// }				
 			}
 		}
 	}

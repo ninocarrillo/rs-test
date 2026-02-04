@@ -17,14 +17,14 @@
 #define MAX_GENPOLY_ROOTS 32
 
 typedef struct {
+    GF2_def_struct *GF;
     int Genpoly[MAX_GENPOLY_ROOTS + 1];
+    int ErrorLocs[MAX_GENPOLY_ROOTS];
+    int ErrorMags[MAX_GENPOLY_ROOTS];
     int FirstRoot;
     int NumRoots;
     int FieldOrder;
-    GF2_def_struct *GF;
     int ErrorCount;
-    int ErrorLocs[MAX_GENPOLY_ROOTS];
-    int ErrorMags[MAX_GENPOLY_ROOTS];
     int MinimumErrorDistance;
 } RS2_def_struct;
 
