@@ -17,15 +17,15 @@
 #define MAX_GENPOLY_ROOTS 32
 
 typedef struct {
-    uint16_t Genpoly[MAX_GENPOLY_ROOTS + 1];
-    int16_t FirstRoot;
-    int16_t NumRoots;
-    int16_t FieldOrder;
+    int Genpoly[MAX_GENPOLY_ROOTS + 1];
+    int FirstRoot;
+    int NumRoots;
+    int FieldOrder;
     GF2_def_struct *GF;
-    int16_t ErrorCount;
-    uint16_t ErrorLocs[MAX_GENPOLY_ROOTS];
-    uint16_t ErrorMags[MAX_GENPOLY_ROOTS];
-    int16_t MinimumErrorDistance;
+    int ErrorCount;
+    int ErrorLocs[MAX_GENPOLY_ROOTS];
+    int ErrorMags[MAX_GENPOLY_ROOTS];
+    int MinimumErrorDistance;
 } RS2_def_struct;
 
 #endif	/* RS2_DEF_STRUCT_H */

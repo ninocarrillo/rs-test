@@ -15,7 +15,7 @@
 // Initializes Reed Solomon parameters in memory for library functions.
 // Arg1: starting root for generator polynomial
 // Arg2: number of roots in generator polynomial
-void InitRS2(int16_t, int16_t, RS2_def_struct*);
+void InitRS2(int, int, RS2_def_struct*);
 
 // rs2_enc
 // Computes Reed Solomon parity symbols for input array and appends them to the

@@ -1,7 +1,7 @@
 #include "rs2.h"
 #include "gf2.h"
 
-void InitRS2(int16_t first_root, int16_t num_roots, RS2_def_struct *rs) {
+void InitRS2(int first_root, int num_roots, RS2_def_struct *rs) {
     rs->FirstRoot = first_root;
     rs->NumRoots = num_roots;
     rs->FieldOrder = gf2_get_order(rs->GF);
@@ -12,10 +12,10 @@ void InitRS2(int16_t first_root, int16_t num_roots, RS2_def_struct *rs) {
     rs->Genpoly[0] = gf2_pow(first_root, rs->GF);
     rs->Genpoly[1] = 1;
     
-    uint16_t factorpoly[2];
+    int factorpoly[2];
     // preload the x^1 coefficient in the factor polynomial
     factorpoly[1] = 1;
-    int16_t i;
+    int i;
     for (i = first_root + 1; i < first_root + num_roots; i++) {
         factorpoly[0] = gf2_pow(i, rs->GF);
         gf2_conv(&rs->Genpoly[0], i + 1 - first_root, &factorpoly[0], 2, rs->GF);

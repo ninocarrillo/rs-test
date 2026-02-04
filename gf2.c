@@ -3,7 +3,7 @@
 
 void lfsr_step(GF2_def_struct *gf) {
 // utilize Galois configuration to implement LFSR
-   int feedback = gf->LFSR & (gf->GenPoly); // save the feedback bit
+   int feedback = gf->LFSR & gf->GenPoly; // save feedback
    gf->LFSR >>= 1; // shift memory register right one bit
    if (feedback & 1) { // if the feedback bit is one
       gf->LFSR ^= (gf->GenPoly >> 1); // then XOR the tapped bits
@@ -15,16 +15,16 @@ int gf2_get_order(GF2_def_struct *gf) {
     return gf->Order;
 }
 
-uint16_t gf2_pow(uint16_t i, GF2_def_struct *gf) {
-    return gf->Table[i];
+int gf2_pow(int i, GF2_def_struct *gf) {
+    return gf->Table[i & gf->Mask];
 }
 
-uint16_t gf2_log(uint16_t i, GF2_def_struct *gf) {
-    return gf->Index[i];
+int gf2_log(int i, GF2_def_struct *gf) {
+    return gf->Index[i & gf->Mask];
 }
 
-uint16_t gf2_inv(uint16_t i, GF2_def_struct *gf) {
-    return gf->Inverse[i];
+int gf2_inv(int i, GF2_def_struct *gf) {
+    return gf->Inverse[i & gf->Mask];
 }
 
 int InitGF2(int genpoly, GF2_def_struct *gf) {
@@ -98,26 +98,25 @@ int gf2_div(int a_arg, int b_arg, GF2_def_struct *gf) {
 	return gf->Table[a];
 }
 
-uint16_t gf2_conv(uint16_t *p1, int16_t p1n, uint16_t *p2, int16_t p2n, GF2_def_struct *gf) {
+int gf2_conv(int *p1, int p1n, int *p2, int p2n, GF2_def_struct *gf) {
 // convolves two gf polynomials
-// p1 points to polynomial1 containing p1n uint16_t elements
-// p2 points to polynomial2 containing p2n uint16_t elements
+// p1 points to polynomial1 containing p1n elements
+// p2 points to polynomial2 containing p2n elements
 // p1 and p2 are stored with lowest power at lowest address
 // returns p1n + p2n - 1
 // places result in p1
 // p1 must have length p1n + p2n - 1
-	uint16_t i, j, k;
-	k = p1n + p2n - 1;
-	uint16_t pr[k];
-	for (i = 0; i < k; i++) {
+	int k = p1n + p2n - 1;
+	int pr[k];
+	for (int i = 0; i < k; i++) {
 		pr[i] = 0;
 	}
-	for (i = 0; i < p1n; i++) {
-		for (j = 0; j < p2n; j++) {
+	for (int i = 0; i < p1n; i++) {
+		for (int j = 0; j < p2n; j++) {
 			pr[i + j] = pr[i + j] ^ gf2_mul(p1[i], p2[j], gf);
 		}
 	}
-	for (i = 0; i < k; i++) {
+	for (int i = 0; i < k; i++) {
 		p1[i] = pr[i];
 	}
 	return k;

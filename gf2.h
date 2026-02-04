@@ -43,18 +43,18 @@ int gf2_div(int, int, GF2_def_struct*);
 // Arg3: pointer to least significant coefficient of polynomial 2
 // Arg4: number of coefficients in polynomial 2
 // Returns convolved polynomial of length (p1n + p2n - 1).
-uint16_t gf2_conv(uint16_t*, int16_t, uint16_t*, int16_t, GF2_def_struct*);
+int gf2_conv(int*, int, int*, int, GF2_def_struct*);
 
 // gf2_pow
 // Returns field primitive (2) raised to Arg.
-uint16_t gf2_pow(uint16_t, GF2_def_struct*);
+int gf2_pow(int, GF2_def_struct*);
 
 // gf2_log
 // Returns log base <field primitive> (2) of Arg.
-uint16_t gf2_log(uint16_t, GF2_def_struct*);
+int gf2_log(int, GF2_def_struct*);
 
 // gf2_inv
 // Returns 1/Arg.
-uint16_t gf2_inv(uint16_t, GF2_def_struct*);
+int gf2_inv(int, GF2_def_struct*);
 
 #endif	/* GF2_H */
