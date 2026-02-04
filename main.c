@@ -39,7 +39,7 @@ void GenErrorVector(int *buffer, int mask, int size, int count) {
 	}
 }
 
-void CombineVectors(uint16_t *in1, uint16_t *in2, uint16_t *out, int count) {
+void CombineVectors(int *in1, int *in2, int *out, int count) {
 	for (int i = 0; i < count; i++) {
 		out[i] = in1[i] ^ in2[i];
 	}
