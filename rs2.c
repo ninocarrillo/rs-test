@@ -39,10 +39,8 @@ void RSEncode(int *message, int block_size, RS2_def_struct *rs) {
 		}
 		quotient[rs->NumRoots] = message[i + rs->NumRoots + 1];
 	}
-	int i = block_size;
-	for (int j = 0; j < rs->NumRoots; j++) {
-		message[i] = quotient[j];
-		i++;
+	for (int i = 0; i < rs->NumRoots; i++) {
+		message[i + block_size] = quotient[i];
 	}
 }
 
