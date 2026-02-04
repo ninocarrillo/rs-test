@@ -43,6 +43,24 @@ void RSEncode(int *message, int message_size, RS2_def_struct *rs) {
 	}
 }
 
+int calc_syndromes(int *data_block, int block_size, int *syndromes, RS2_def_struct *rs) {
+	// Calculate one syndrome for each root of rs->GenPoly.
+	// Each syndrome is the evaluation of the message polynomial at a root of rs->GenPoly
+	int nonzero = 0; // Count how many non-zero syndromes are calculated.
+	for (int i = 0; i < rs->NumRoots; i++) {
+		syndromes[i] = 0;
+        int x = GF2Pow(rs->FirstRoot + i, rs->GF);
+		for (int j = 0; j < block_size - 1; j++) {
+			syndromes[i] = GF2Mul(syndromes[i] ^ data_block[j], x, rs->GF);
+		}
+		syndromes[i] = syndromes[i] ^ data_block[block_size - 1];
+		if (syndromes[i]) {
+			nonzero++;// Count how many non-zero syndromes are calculated.
+		}
+	}
+	return nonzero;
+}
+
 int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 	int syndromes[MAX_GENPOLY_ROOTS];
     int error_locator[MAX_GENPOLY_ROOTS];
@@ -51,24 +69,7 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 	int step_factor, order_tracker;
 	int x, y, z, e;
     
-	// find the syndromes, S
-	// calculate one syndrome for each root of rs->genpoly
-	for (int i = 0; i < rs->NumRoots; i++) {
-		syndromes[i] = 0;
-        x = GF2Pow(rs->FirstRoot + i, rs->GF);
-		y = block_size - 1;
-		int j;
-		for (j = 0; j < y; j++) {
-			syndromes[i] = syndromes[i] ^ data_block[j];
-			syndromes[i] = GF2Mul(syndromes[i], x, rs->GF);
-		}
-		syndromes[i] = syndromes[i] ^ data_block[j];
-	}
-	// printf("\r\nRS First Root: %li", rs->FirstRoot);
-	// printf("\r\nRS Decode Syndromes: ");
-	// for (int i = 0; i < rs->NumRoots; i++) {
-		// printf("%li ", syndromes[i]);
-	// }
+	calc_syndromes(data_block, block_size, syndromes, rs);
 
     // Berlekamp's Algorothm
     // calculate the error locator
@@ -84,6 +85,9 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		correction_poly[i] = 0;
 		next_error_locator[i] = 0;
 	}
+	correction_poly[rs->NumRoots] = 0;
+	
+	
 	error_locator[0] = 1;
 	correction_poly[1] = 1;	// C = x
 	order_tracker = 0;
@@ -118,6 +122,8 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		}
 		correction_poly[0] = 0;
 	}
+	
+	
     // now solve the error locator polynomial to find the error positions
     // by using the Chien Search
     // Uses V[i] calculated above
@@ -190,20 +196,20 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		data_block[rs->ErrorLocs[i]] = data_block[rs->ErrorLocs[i]] ^ rs->ErrorMags[i];
 	}
 	// check for success by calculating syndromes (should be zero if no errors)
-	for (int i = 0; i < rs->NumRoots; i++) {
-		syndromes[i] = 0;
-		x = GF2Pow(rs->FirstRoot + i, rs->GF);
-		y = block_size - 1;
-		int j;
-		for (j = 0; j < y; j++) {
-			syndromes[i] = syndromes[i] ^ data_block[j];
-			syndromes[i] = GF2Mul(syndromes[i], x, rs->GF);
-		}
-		syndromes[i] = syndromes[i] ^ data_block[j];
-		if (syndromes[i] != 0) {
-			return -1; // decode fail
-		}
+	// for (int i = 0; i < rs->NumRoots; i++) {
+		// syndromes[i] = 0;
+        // x = GF2Pow(rs->FirstRoot + i, rs->GF);
+		// for (int j = 0; j < block_size - 1; j++) {
+			// syndromes[i] = GF2Mul(syndromes[i] ^ data_block[j], x, rs->GF);
+		// }
+		// syndromes[i] = syndromes[i] ^ data_block[block_size - 1];
+		// if (syndromes[i] != 0) {
+			// return -1; // decode fail
+		// }
+	// }
+	int nonzero = calc_syndromes(data_block, block_size, syndromes, rs);
+	if (nonzero) {
+		return nonzero;
 	}
-
 	return rs->ErrorCount; // return number of errors corrected    
 }
