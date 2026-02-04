@@ -80,22 +80,21 @@ int gf2_mul(int a, int b, GF2_def_struct *gf) {
 }
 
 int gf2_div(int a_arg, int b_arg, GF2_def_struct *gf) {
-	int a, b;
-	a = a_arg;
-	b = b_arg;
+	int a = a_arg;
+	int b = b_arg;
 	if (b == 0) {
 		return -1;
 	}
 	if (a == 0) {
 		return 0;
 	}
-	a = gf->Index[a];
-	b = gf->Index[b];
+	a = gf->Index[a & gf->Mask];
+	b = gf->Index[b & gf->Mask];
 	a = a - b;
-	while (a < 0) {
+	if (a < 0) {
 		a = a + (gf->Order - 1);
 	}
-	return gf->Table[a];
+	return gf->Table[a & gf->Mask];
 }
 
 int gf2_conv(int *p1, int p1n, int *p2, int p2n, GF2_def_struct *gf) {
