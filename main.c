@@ -6,14 +6,14 @@
 
 #define MAX_BUFFER 2000
 
-void GenRandomMessage(uint16_t *buffer, int mask, int size) {
+void GenRandomMessage(int *buffer, int mask, int size) {
 	for (int i = 0; i < size; i++) {
 		buffer[i] = rand() & mask;
 	}
 }
 
-void GenErrorVector(uint16_t *buffer, int mask, int size, int count) {
-	uint16_t error_locs[MAX_BUFFER];
+void GenErrorVector(int *buffer, int mask, int size, int count) {
+	int error_locs[MAX_BUFFER];
 	// Clear error buffers
 	for (int i = 0; i < size; i++) {
 		buffer[i] = 0;
@@ -119,10 +119,10 @@ int main(int arg_count, char* arg_values[]) {
 	}
 	printf("\r\n");
 
-	uint16_t original_message[MAX_BUFFER];
-	uint16_t error_vector[MAX_BUFFER];
-	uint16_t corrupt_message[MAX_BUFFER];
-	uint16_t decoded_message[MAX_BUFFER];
+	int original_message[MAX_BUFFER];
+	int error_vector[MAX_BUFFER];
+	int corrupt_message[MAX_BUFFER];
+	int decoded_message[MAX_BUFFER];
 
 	int failures[parity_size];
 	int undetected_failures[parity_size];
