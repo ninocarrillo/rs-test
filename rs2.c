@@ -23,25 +23,23 @@ void InitRS2(int first_root, int num_roots, RS2_def_struct *rs) {
     rs->MinimumErrorDistance = 0;
 }
 
-void RSEncode16(uint16_t *message, int16_t block_size, RS2_def_struct *rs) {
-	int16_t i, j;
-    uint16_t x;
-	uint16_t quotient[MAX_GENPOLY_ROOTS + 1];
-	for (i = 0; i < rs->NumRoots; i++) {
+void RSEncode16(int *message, int block_size, RS2_def_struct *rs) {
+	int quotient[MAX_GENPOLY_ROOTS + 1];
+	for (int i = 0; i < rs->NumRoots; i++) {
 		message[i + block_size] = 0;
 	}
-	for (i = 0; i < rs->NumRoots + 1; i++) {
+	for (int i = 0; i < rs->NumRoots + 1; i++) {
 		quotient[i] = message[i];
 	}
-	for (i = 0; i < block_size; i++) {
-		x = quotient[0];
-		for (j = 1; j < rs->NumRoots + 1; j++) {
+	for (int i = 0; i < block_size; i++) {
+		int x = quotient[0];
+		for (int j = 1; j < rs->NumRoots + 1; j++) {
 			quotient[j - 1] = gf2_mul(x, rs->Genpoly[rs->NumRoots - j], rs->GF) ^ quotient[j];
 		}
 		quotient[rs->NumRoots] = message[i + rs->NumRoots + 1];
 	}
-	i = block_size;
-	for (j = 0; j < rs->NumRoots; j++) {
+	int i = block_size;
+	for (int j = 0; j < rs->NumRoots; j++) {
 		message[i] = quotient[j];
 		i++;
 	}
@@ -71,14 +69,14 @@ void RSEncode8(uint8_t *message, int16_t block_size, RS2_def_struct *rs) {
 	}
 }
 
-int16_t RSDecode16(uint16_t *data_block, int16_t block_size, RS2_def_struct *rs) {
-	uint16_t syndromes[MAX_GENPOLY_ROOTS];
-    uint16_t error_locator[MAX_GENPOLY_ROOTS];
-    uint16_t correction_poly[MAX_GENPOLY_ROOTS + 1];
-    uint16_t next_error_locator[MAX_GENPOLY_ROOTS];
-	int16_t step_factor, order_tracker;
-    int16_t i, j;
-	uint16_t x, y, z, e;
+int RSDecode16(int *data_block, int block_size, RS2_def_struct *rs) {
+	int syndromes[MAX_GENPOLY_ROOTS];
+    int error_locator[MAX_GENPOLY_ROOTS];
+    int correction_poly[MAX_GENPOLY_ROOTS + 1];
+    int next_error_locator[MAX_GENPOLY_ROOTS];
+	int step_factor, order_tracker;
+    int i, j;
+	int x, y, z, e;
     
 // find the syndromes, S
 // calculate one syndrome for each root of rs->genpoly

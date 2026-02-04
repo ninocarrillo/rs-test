@@ -22,7 +22,7 @@ void GenErrorVector(int *buffer, int mask, int size, int count) {
 	// Generate count unique error locations in range 0:(size-1)
 	int error_index = 0;
 	while(error_index < count) {
-		int candidate_location = rand() % (size + 1);
+		int candidate_location = rand() % size;
 		int is_unique = 1;
 		int i = 0;
 		while (is_unique && (i < error_index)) {
@@ -35,7 +35,11 @@ void GenErrorVector(int *buffer, int mask, int size, int count) {
 		}
 	}
 	for (int i = 0; i < count; i++) {
-		buffer[error_locs[i]] = rand() & mask;
+		int x = 0;
+		while (x == 0) {
+			x = rand() & mask;
+		}
+		buffer[error_locs[i]] = x;
 	}
 }
 
@@ -45,10 +49,10 @@ void CombineVectors(int *in1, int *in2, int *out, int count) {
 	}
 }
 
-int CompareVectors(uint16_t *a, uint16_t *b, int size) {
+int CompareVectors(int *a, int *b, int size) {
 	int errors = 0;
 	for (int i = 0; i < size; i++) {
-		if (a[i] != b[i]) {
+		if (a[i] ^ b[i]) {
 			errors++;
 		}
 	}
@@ -126,9 +130,11 @@ int main(int arg_count, char* arg_values[]) {
 
 	int failures[parity_size];
 	int undetected_failures[parity_size];
+	int successes[parity_size];
 	for (int i = 0; i < parity_size; i++) {
 		failures[i] = 0;
 		undetected_failures[i] = 0;
+		successes[i] = 0;
 	}
 
 	printf("\r\nStarting %i runs.\r\n", parity_size * run_count);
@@ -136,49 +142,60 @@ int main(int arg_count, char* arg_values[]) {
 	
 	for (int error_count = 1; error_count <= parity_size; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
-			printf("\r\nError Count %i, Run %i, ", error_count, run_number);
-			printf("\r%i", master_count++);
+			printf("\r\n\nError Count %i, Run %i, ", error_count, run_number);
+			//printf("\r%i", master_count++);
 			// Generate a random message to encode.
 			GenRandomMessage(original_message, gf.Order - 1, message_size);
 			printf("\r\nMessage:");
 			for (int i = 0; i < message_size; i++) {
-				printf(" %X", original_message[i]);
+				printf(" %lX", original_message[i]);
 			}
 			// Encode message in Reed Solomon block.
 			RSEncode16(original_message, message_size, &rs);
 			printf("\r\nEncodedMessage:");
 			for (int i = 0; i < block_size; i++) {
-				printf(" %X", original_message[i]);
+				printf(" %lX", original_message[i]);
 			}
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
 			printf("\r\nError Vector:");
 			for (int i = 0; i < block_size; i++) {
-				printf(" %X", error_vector[i]);
+				printf(" %lX", error_vector[i]);
 			}
 
 			CombineVectors(original_message, error_vector, corrupt_message, block_size);
 			printf("\r\nCorrupt Message:");
 			for (int i = 0; i < block_size; i++) {
-				printf(" %X", corrupt_message[i]);
+				printf(" %lX", corrupt_message[i]);
 			}
 
 			int corrected_count = RSDecode16(corrupt_message, block_size, &rs);
 			printf("\r\nCorrected %i errors in message:", corrected_count);
 			for (int i = 0; i < block_size; i++) {
-				printf(" %X", corrupt_message[i]);
+				printf(" %lX", corrupt_message[i]);
 			}
 
-			int errors = CompareVectors(corrupt_message, original_message, message_size);
+			int errors = CompareVectors(corrupt_message, original_message, block_size);
+			printf("\r\nBlock size: %i, Errors: %i", block_size, errors);
 			if (errors > 0) {
 				failures[error_count - 1]++;
 				if (corrected_count >= 0) {
 					undetected_failures[error_count - 1]++;
 				}
+			} else {
+				successes[error_count - 1]++;
+				printf("\r\nSuccessful message:", corrected_count);
+				for (int i = 0; i < block_size; i++) {
+					printf(" %lX,%lX", corrupt_message[i], original_message[i]);
+				}				
 			}
 		}
 	}
 
+	printf("\r\nDecode Success by Error Count:");
+	for (int i = 0; i < parity_size; i++) {
+		printf("\r\n%i, %i", i+1, successes[i]);
+	}
 	printf("\r\nDecode Failures by Error Count:");
 	for (int i = 0; i < parity_size; i++) {
 		printf("\r\n%i, %i", i+1, failures[i]);
