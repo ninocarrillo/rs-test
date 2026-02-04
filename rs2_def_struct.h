@@ -25,7 +25,6 @@ typedef struct {
     int NumRoots;
     int FieldOrder;
     int ErrorCount;
-    int MinimumErrorDistance;
 } RS2_def_struct;
 
 #endif	/* RS2_DEF_STRUCT_H */

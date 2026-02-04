@@ -127,19 +127,21 @@ int main(int arg_count, char* arg_values[]) {
 	int corrupt_message[MAX_BUFFER];
 	int decoded_message[MAX_BUFFER];
 
-	int failures[parity_size];
-	int undetected_failures[parity_size];
-	int successes[parity_size];
-	for (int i = 0; i < parity_size; i++) {
+	int decoder_indicated_failures[parity_size+1];
+	int failures[parity_size+1];
+	int undetected_failures[parity_size+1];
+	int successes[parity_size+1];
+	for (int i = 0; i <= parity_size; i++) {
 		failures[i] = 0;
 		undetected_failures[i] = 0;
 		successes[i] = 0;
+		decoder_indicated_failures[i] = 0;
 	}
 
-	printf("\r\nStarting %i runs.\r\n", parity_size * run_count);
+	printf("\r\nStarting %i runs.\r\n", (parity_size + 1) * run_count);
 	int master_count = 1;
 	
-	for (int error_count = 1; error_count <= parity_size; error_count++) {
+	for (int error_count = 0; error_count <= parity_size; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
 			// printf("\r\n\nError Count %i, Run %i, ", error_count, run_number);
 			printf("\r%i", master_count++);
@@ -151,10 +153,10 @@ int main(int arg_count, char* arg_values[]) {
 			// }
 			// Encode message in Reed Solomon block.
 			RSEncode(original_message, message_size, &rs);
-			// printf("\r\nEncodedMessage:");
-			// for (int i = 0; i < block_size; i++) {
-				// printf(" %lX", original_message[i]);
-			// }
+			printf("\r\nEncodedMessage:");
+			for (int i = 0; i < block_size; i++) {
+				printf(" %lX", original_message[i]);
+			}
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
 			// printf("\r\nError Vector:");
@@ -169,6 +171,9 @@ int main(int arg_count, char* arg_values[]) {
 			// }
 
 			int corrected_count = RSDecode(corrupt_message, block_size, &rs);
+			if (corrected_count < 0) {
+				decoder_indicated_failures[error_count]++;
+			}
 			// printf("\r\nCorrected %i errors in message:", corrected_count);
 			// for (int i = 0; i < block_size; i++) {
 				// printf(" %lX", corrupt_message[i]);
@@ -177,12 +182,12 @@ int main(int arg_count, char* arg_values[]) {
 			int errors = CompareVectors(corrupt_message, original_message, block_size);
 			// printf("\r\nBlock size: %i, Errors: %i", block_size, errors);
 			if (errors > 0) {
-				failures[error_count - 1]++;
+				failures[error_count]++;
 				if (corrected_count >= 0) {
 					undetected_failures[error_count - 1]++;
 				}
 			} else {
-				successes[error_count - 1]++;
+				successes[error_count]++;
 				// printf("\r\nSuccessful message:", corrected_count);
 				// for (int i = 0; i < block_size; i++) {
 					// printf(" %lX,%lX", corrupt_message[i], original_message[i]);
@@ -192,16 +197,20 @@ int main(int arg_count, char* arg_values[]) {
 	}
 
 	printf("\r\nDecode Success by Error Count:");
-	for (int i = 0; i < parity_size; i++) {
-		printf("\r\n%i, %i", i+1, successes[i]);
+	for (int i = 0; i <= parity_size; i++) {
+		printf("\r\n%i, %i", i, successes[i]);
 	}
-	printf("\r\nDecode Failures by Error Count:");
-	for (int i = 0; i < parity_size; i++) {
-		printf("\r\n%i, %i", i+1, failures[i]);
+	printf("\r\nDecoder Indicated Failures by Error Count:");
+	for (int i = 0; i <= parity_size; i++) {
+		printf("\r\n%i, %i", i, decoder_indicated_failures[i]);
+	}
+	printf("\r\nActual Decode Failures by Error Count:");
+	for (int i = 0; i <= parity_size; i++) {
+		printf("\r\n%i, %i", i, failures[i]);
 	}
 	printf("\r\nUndetected Decode Failures by Error Count:");
-	for (int i = 0; i < parity_size; i++) {
-		printf("\r\n%i, %i", i+1, undetected_failures[i]);
+	for (int i = 0; i <= parity_size; i++) {
+		printf("\r\n%i, %i", i, undetected_failures[i]);
 	}
 	printf("\r\nDone.\r\n");
 }
