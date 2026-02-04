@@ -8,8 +8,6 @@
 #ifndef GF2_DEF_STRUCT_H
 #define	GF2_DEF_STRUCT_H
 
-#include "stdint.h"
-
 // Change to suit your application. Bigger = more memory used!
 #define MAX_GF_BITS 10
 
