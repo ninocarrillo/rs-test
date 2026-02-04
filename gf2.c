@@ -10,15 +10,15 @@ void lfsr_step(GF2_def_struct *gf) {
    return;
 }
 
-int gf2_get_order(GF2_def_struct *gf) {
+int GF2GetOrder(GF2_def_struct *gf) {
     return gf->Order;
 }
 
-int gf2_pow(int i, GF2_def_struct *gf) {
+int GF2Pow(int i, GF2_def_struct *gf) {
     return gf->Table[i & gf->Mask];
 }
 
-int gf2_log(int i, GF2_def_struct *gf) {
+int GF2Log(int i, GF2_def_struct *gf) {
     return gf->Index[i & gf->Mask];
 }
 
@@ -56,7 +56,7 @@ int InitGF2(int genpoly, GF2_def_struct *gf) {
 	    gf->Inverse[0] = 0;
 	    for (int i = 1; i < gf->Order; i++) {
 	        int j = 1;
-	        while (gf2_mul(i, j, gf) != 1) {
+	        while (GF2Mul(i, j, gf) != 1) {
 	            j++;
 	        }
 	        gf->Inverse[i] = j;
@@ -65,7 +65,7 @@ int InitGF2(int genpoly, GF2_def_struct *gf) {
     return status;
 }
 
-int gf2_mul(int a, int b, GF2_def_struct *gf) {
+int GF2Mul(int a, int b, GF2_def_struct *gf) {
 	if ((a == 0) | (b == 0)) {
 		return 0;
 	}
@@ -78,7 +78,7 @@ int gf2_mul(int a, int b, GF2_def_struct *gf) {
 	return gf->Table[a & gf->Mask];
 }
 
-int gf2_div(int a_arg, int b_arg, GF2_def_struct *gf) {
+int GF2Div(int a_arg, int b_arg, GF2_def_struct *gf) {
 	int a = a_arg;
 	int b = b_arg;
 	if (b == 0) {
@@ -96,7 +96,7 @@ int gf2_div(int a_arg, int b_arg, GF2_def_struct *gf) {
 	return gf->Table[a & gf->Mask];
 }
 
-int gf2_conv(int *p1, int p1n, int *p2, int p2n, GF2_def_struct *gf) {
+int GF2Conv(int *p1, int p1n, int *p2, int p2n, GF2_def_struct *gf) {
 // convolves two gf polynomials
 // p1 points to polynomial1 containing p1n elements
 // p2 points to polynomial2 containing p2n elements
@@ -111,7 +111,7 @@ int gf2_conv(int *p1, int p1n, int *p2, int p2n, GF2_def_struct *gf) {
 	}
 	for (int i = 0; i < p1n; i++) {
 		for (int j = 0; j < p2n; j++) {
-			pr[i + j] = pr[i + j] ^ gf2_mul(p1[i], p2[j], gf);
+			pr[i + j] = pr[i + j] ^ GF2Mul(p1[i], p2[j], gf);
 		}
 	}
 	for (int i = 0; i < k; i++) {

@@ -16,14 +16,14 @@
 #define MAX_FIELD_SIZE (1 << MAX_GF_BITS)
 
 typedef struct {
+    int Table[MAX_FIELD_SIZE - 1];
+    int Index[MAX_FIELD_SIZE];
+    int Inverse[MAX_FIELD_SIZE];
     int Power;
     int GenPoly;
     int Order;
     int LFSR;
     int Mask;
-    int Table[MAX_FIELD_SIZE - 1];
-    int Index[MAX_FIELD_SIZE];
-    int Inverse[MAX_FIELD_SIZE];
 } GF2_def_struct;
 
 #endif	/* GF2_DEF_STRUCT_H */
