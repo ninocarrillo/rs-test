@@ -81,10 +81,10 @@ int main(int arg_count, char* arg_values[]) {
 	// Initialize Galois Field.
 	GF2_def_struct gf;
 	int gf_status = InitGF2(gf_poly, &gf);
-	// printf("\r\nGalois Field Table, order %i:\r\n", gf.Order);
-	// for (int i = 0; i < (gf.Order-1); i++) {
-	// 	printf("%i ", gf.Table[i]);
-	// }
+	printf("\r\nGalois Field Table, order %i:\r\n", gf.Order);
+	for (int i = 0; i < (gf.Order-1); i++) {
+		printf("%i ", gf.Table[i]);
+	}
 	if (gf_status > 0) {
 		printf("\r\nGalois Field generator polynomial is not irreducible, field repeated %i times.", gf_status);
 		return(-1);
@@ -136,38 +136,38 @@ int main(int arg_count, char* arg_values[]) {
 	
 	for (int error_count = 1; error_count <= parity_size; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
-			// printf("\r\nError Count %i, Run %i, ", error_count, run_number);
+			printf("\r\nError Count %i, Run %i, ", error_count, run_number);
 			printf("\r%i", master_count++);
 			// Generate a random message to encode.
 			GenRandomMessage(original_message, gf.Order - 1, message_size);
-			// printf("\r\nMessage:");
-			// for (int i = 0; i < message_size; i++) {
-			// 	printf(" %02X", original_message[i]);
-			// }
+			printf("\r\nMessage:");
+			for (int i = 0; i < message_size; i++) {
+				printf(" %X", original_message[i]);
+			}
 			// Encode message in Reed Solomon block.
 			RSEncode16(original_message, message_size, &rs);
-			// printf("\r\nEncodedMessage:");
-			// for (int i = 0; i < block_size; i++) {
-			// 	printf(" %02X", original_message[i]);
-			// }
+			printf("\r\nEncodedMessage:");
+			for (int i = 0; i < block_size; i++) {
+				printf(" %X", original_message[i]);
+			}
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
-			// printf("\r\nError Vector:");
-			// for (int i = 0; i < block_size; i++) {
-			// 	printf(" %02X", error_vector[i]);
-			// }
+			printf("\r\nError Vector:");
+			for (int i = 0; i < block_size; i++) {
+				printf(" %X", error_vector[i]);
+			}
 
 			CombineVectors(original_message, error_vector, corrupt_message, block_size);
-			// printf("\r\nCorrupt Message:");
-			// for (int i = 0; i < block_size; i++) {
-			// 	printf(" %02X", corrupt_message[i]);
-			// }
+			printf("\r\nCorrupt Message:");
+			for (int i = 0; i < block_size; i++) {
+				printf(" %X", corrupt_message[i]);
+			}
 
 			int corrected_count = RSDecode16(corrupt_message, block_size, &rs);
-			// printf("\r\nCorrected %i errors in message:", corrected_count);
-			// for (int i = 0; i < block_size; i++) {
-			// 	printf(" %02X", corrupt_message[i]);
-			// }
+			printf("\r\nCorrected %i errors in message:", corrected_count);
+			for (int i = 0; i < block_size; i++) {
+				printf(" %X", corrupt_message[i]);
+			}
 
 			int errors = CompareVectors(corrupt_message, original_message, message_size);
 			if (errors > 0) {
