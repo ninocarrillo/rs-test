@@ -18,9 +18,9 @@
 #define MAX_FIELD_SIZE (1 << MAX_GF_BITS)
 
 typedef struct {
-    int16_t Power;
-    uint16_t GenPoly;
-    int16_t Order;
+    int Power;
+    int GenPoly;
+    int Order;
     uint16_t LFSR;
     uint8_t Table[MAX_FIELD_SIZE - 1];
     uint8_t Index[MAX_FIELD_SIZE];

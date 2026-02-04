@@ -65,36 +65,42 @@ int main(int arg_count, char* arg_values[]) {
 	
 	if (arg_count < 6) {
 		printf("Not enough arguments.\r\n");
-		printf("Usage:\r\nrs-test <message size> <block size> <gf poly> <rs first root> <runs>\r\n");
+		printf("Usage:\r\nrs-test <gf poly> <message size> <block size> <rs first root> <runs>\r\n");
 		return(-1);
 	}
 
-	int message_size = atoi(arg_values[1]);
-	int block_size = atoi(arg_values[2]);
+	int gf_poly = atoi(arg_values[1]);
+	int message_size = atoi(arg_values[2]);
+	int block_size = atoi(arg_values[3]);
 	int parity_size = block_size - message_size;
-	int gf_poly = atoi(arg_values[3]);
 	int rs_first_root = atoi(arg_values[4]);
 	int run_count = atoi(arg_values[5]);
 	
-	// Determine the field order based on generator polynomial
-	int gf_order = 1;
-	int gf_power = 0;
-	while ((gf_order<<1) < gf_poly) {
-		gf_order <<= 1;
-		gf_power++;
-	}
-	
-	if (block_size > (gf_order - 1)) {
-		printf("\r\nBlock size %i is too large. Must be less than field order %i.\r\n", block_size, gf_order);
-		return(-1);
-	}
-	
+	// Initialize Galois Field.
 	GF2_def_struct gf;
-	InitGF2(gf_power, gf_poly, &gf);
+	int gf_status = InitGF2(gf_poly, &gf);
 	// printf("\r\nGalois Field Table, order %i:\r\n", gf.Order);
 	// for (int i = 0; i < (gf.Order-1); i++) {
 	// 	printf("%i ", gf.Table[i]);
 	// }
+	if (gf_status > 0) {
+		printf("\r\nGalois Field generator polynomial is not primitive, field repeated %i times.", gf_status);
+		return(-1);
+	}
+	printf("\r\nGalois Field order: %i", gf.Order);
+	printf("\r\nGalois Field power: %i", gf.Power);
+	
+	if (block_size > (gf.Order - 1)) {
+		printf("\r\nBlock size %i is too large. Must be less than field order %i.\r\n", block_size, gf.Order);
+		return(-1);
+	}
+	
+	if (block_size <= message_size) {
+		printf("\r\nMessage size %i is too large. Must be less than block size %i.\r\n", message_size, block_size);
+		return(-1);
+	}
+
+
 	
 	RS2_def_struct rs;
 	rs.GF = &gf;
@@ -127,7 +133,7 @@ int main(int arg_count, char* arg_values[]) {
 			// printf("\r\nError Count %i, Run %i, ", error_count, run_number);
 
 			// Generate a random message to encode.
-			GenRandomMessage(original_message, 0xFF, message_size);
+			GenRandomMessage(original_message, gf.Order - 1, message_size);
 			// printf("\r\nMessage:");
 			// for (int i = 0; i < message_size; i++) {
 			// 	printf(" %02X", original_message[i]);
@@ -139,7 +145,7 @@ int main(int arg_count, char* arg_values[]) {
 			// 	printf(" %02X", original_message[i]);
 			// }
 
-			GenErrorVector(error_vector, 0xFF, block_size, error_count);
+			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
 			// printf("\r\nError Vector:");
 			// for (int i = 0; i < block_size; i++) {
 			// 	printf(" %02X", error_vector[i]);
