@@ -23,7 +23,7 @@ void InitRS2(int first_root, int num_roots, RS2_def_struct *rs) {
     rs->MinimumErrorDistance = 0;
 }
 
-void RSEncode16(int *message, int block_size, RS2_def_struct *rs) {
+void RSEncode(int *message, int block_size, RS2_def_struct *rs) {
 	int quotient[MAX_GENPOLY_ROOTS + 1];
 	for (int i = 0; i < rs->NumRoots; i++) {
 		message[i + block_size] = 0;
@@ -69,7 +69,7 @@ void RSEncode8(uint8_t *message, int16_t block_size, RS2_def_struct *rs) {
 	}
 }
 
-int RSDecode16(int *data_block, int block_size, RS2_def_struct *rs) {
+int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 	int syndromes[MAX_GENPOLY_ROOTS];
     int error_locator[MAX_GENPOLY_ROOTS];
     int correction_poly[MAX_GENPOLY_ROOTS + 1];

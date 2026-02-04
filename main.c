@@ -151,7 +151,7 @@ int main(int arg_count, char* arg_values[]) {
 				printf(" %lX", original_message[i]);
 			}
 			// Encode message in Reed Solomon block.
-			RSEncode16(original_message, message_size, &rs);
+			RSEncode(original_message, message_size, &rs);
 			printf("\r\nEncodedMessage:");
 			for (int i = 0; i < block_size; i++) {
 				printf(" %lX", original_message[i]);
@@ -169,7 +169,7 @@ int main(int arg_count, char* arg_values[]) {
 				printf(" %lX", corrupt_message[i]);
 			}
 
-			int corrected_count = RSDecode16(corrupt_message, block_size, &rs);
+			int corrected_count = RSDecode(corrupt_message, block_size, &rs);
 			printf("\r\nCorrected %i errors in message:", corrected_count);
 			for (int i = 0; i < block_size; i++) {
 				printf(" %lX", corrupt_message[i]);
