@@ -9,6 +9,7 @@ void InitRS2(int first_root, int num_roots, RS2_def_struct *rs) {
     // rs->genpoly = (x + a^b)(x + a^b+1)...(x + a^b+r-1)
     // start with rs->genpoly = x + a^b
     // lowest order coefficient in lowest index of array
+	// b represents the "first consecutive root" of generator polynomial.
     rs->Genpoly[0] = GF2Pow(first_root, rs->GF);
     rs->Genpoly[1] = 1;
     
