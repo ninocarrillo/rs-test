@@ -7,13 +7,12 @@ void InitRS2(int first_root, int num_roots, RS2_def_struct *rs) {
     rs->NumRoots = num_roots;
     rs->FieldOrder = GF2GetOrder(rs->GF);
     // Generate Reed Solomon generator polynomial through convolution of polynomials.
-    // rs->genpoly = (x + a^b)(x + a^b+1)...(x + a^b+r-1)
-    // start with rs->genpoly = x + a^b
+    // rs->GenPoly = (x + a^b)(x + a^b+1)...(x + a^b+r-1)
+    // start with rs->GenPoly = x + a^b
     // lowest order coefficient in lowest index of array
 	// b represents the "first consecutive root" of generator polynomial.
     rs->Genpoly[0] = GF2Pow(rs->FirstRoot, rs->GF);
     rs->Genpoly[1] = 1;
-    
     int factorpoly[2];
     // preload the x^1 coefficient in the factor polynomial
     factorpoly[1] = 1;
@@ -24,10 +23,10 @@ void InitRS2(int first_root, int num_roots, RS2_def_struct *rs) {
 }
 
 void RSEncode(int *message, int message_size, RS2_def_struct *rs) {
-	int quotient[MAX_GENPOLY_ROOTS + 1];
 	for (int i = 0; i < rs->NumRoots; i++) {
 		message[i + message_size] = 0;
 	}
+	int quotient[MAX_GENPOLY_ROOTS + 1];
 	for (int i = 0; i < rs->NumRoots + 1; i++) {
 		quotient[i] = message[i];
 	}
@@ -61,42 +60,20 @@ int calc_syndromes(int *data_block, int block_size, int *syndromes, RS2_def_stru
 	return nonzero;
 }
 
-int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
-	int syndromes[MAX_GENPOLY_ROOTS];
-    int error_locator[MAX_GENPOLY_ROOTS];
-    int correction_poly[MAX_GENPOLY_ROOTS + 1];
+void calc_berlekamp(int *error_locator, int *correction_poly, int *syndromes, RS2_def_struct *rs) {
     int next_error_locator[MAX_GENPOLY_ROOTS];
-	int step_factor, order_tracker;
-	int x, y, z, e;
-    
-	calc_syndromes(data_block, block_size, syndromes, rs);
-
-    // Berlekamp's Algorothm
-    // calculate the error locator
-    // uses:
-    // correction polynomial C
-    // step parameter K
-    // order tracker L
-    // error value x
-    
-    // clear out arrays
-	for (int i = 0; i <  rs->NumRoots; i++) {
-		error_locator[i] = 0;
-		correction_poly[i] = 0;
-		next_error_locator[i] = 0;
-	}
-	correction_poly[rs->NumRoots] = 0;
-	
-	
 	error_locator[0] = 1;
 	correction_poly[1] = 1;	// C = x
-	order_tracker = 0;
-	for (step_factor = 1; step_factor <= rs->NumRoots; step_factor++) {
+	int order_tracker = 0;
+	for (int i = 0; i < rs->NumRoots; i++) {
+		next_error_locator[i] = 0;
+	}
+	for (int step_factor = 1; step_factor <= rs->NumRoots; step_factor++) {
         // first calculate error value, e
-		y = step_factor - 1;
-		e = syndromes[y];
+		int y = step_factor - 1;
+		int e = syndromes[y];
 		for (int i = 1; i <= order_tracker; i++) {
-			x = y - i;
+			int x = y - i;
 			e = e ^ GF2Mul(error_locator[i], syndromes[x], rs->GF);
 		}
         // now update the estimate of V[x]
@@ -116,12 +93,31 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		if ((2 * order_tracker) < step_factor) {
 			order_tracker = step_factor - order_tracker;
 		}
-        // multiply C(x) by x (increase power by one)
+        // multiply correction_poly by x (increase power by one)
 		for (int i = rs->NumRoots; i > 0; i--) {
 			correction_poly[i] = correction_poly[i - 1];
 		}
 		correction_poly[0] = 0;
 	}
+}
+
+int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
+	int syndromes[MAX_GENPOLY_ROOTS];
+    int error_locator[MAX_GENPOLY_ROOTS];
+    int correction_poly[MAX_GENPOLY_ROOTS + 1];
+	int step_factor, order_tracker;
+	int x, y, z, e;
+    
+    // clear out arrays
+	for (int i = 0; i <  rs->NumRoots; i++) {
+		error_locator[i] = 0;
+		correction_poly[i] = 0;
+	}
+	correction_poly[rs->NumRoots] = 0;
+	
+	calc_syndromes(data_block, block_size, syndromes, rs);
+	
+	calc_berlekamp(error_locator, correction_poly, syndromes, rs);
 	
 	
     // now solve the error locator polynomial to find the error positions
@@ -195,19 +191,10 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		rs->ErrorMags[i] = GF2Mul(y, z, rs->GF);
 		data_block[rs->ErrorLocs[i]] = data_block[rs->ErrorLocs[i]] ^ rs->ErrorMags[i];
 	}
+	
 	// check for success by calculating syndromes (should be zero if no errors)
-	// for (int i = 0; i < rs->NumRoots; i++) {
-		// syndromes[i] = 0;
-        // x = GF2Pow(rs->FirstRoot + i, rs->GF);
-		// for (int j = 0; j < block_size - 1; j++) {
-			// syndromes[i] = GF2Mul(syndromes[i] ^ data_block[j], x, rs->GF);
-		// }
-		// syndromes[i] = syndromes[i] ^ data_block[block_size - 1];
-		// if (syndromes[i] != 0) {
-			// return -1; // decode fail
-		// }
-	// }
 	int nonzero = calc_syndromes(data_block, block_size, syndromes, rs);
+	
 	if (nonzero) {
 		return nonzero;
 	}
