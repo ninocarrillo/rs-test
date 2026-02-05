@@ -155,7 +155,7 @@ int main(int arg_count, char* arg_values[]) {
 			RSEncode(original_message, message_size, &rs);
 			printf("\r\nEncodedMessage:");
 			for (int i = 0; i < block_size; i++) {
-				printf(" %lX", original_message[i]);
+				printf(" %X", original_message[i]);
 			}
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
@@ -184,7 +184,7 @@ int main(int arg_count, char* arg_values[]) {
 			if (errors > 0) {
 				failures[error_count]++;
 				if (corrected_count >= 0) {
-					undetected_failures[error_count - 1]++;
+					undetected_failures[error_count]++;
 				}
 			} else {
 				successes[error_count]++;

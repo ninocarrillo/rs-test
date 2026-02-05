@@ -42,7 +42,7 @@ void RSEncode(int *message, int message_size, RS2_def_struct *rs) {
 	}
 }
 
-int calc_syndromes(int *data_block, int block_size, int *syndromes, RS2_def_struct *rs) {
+int calc_syndromes(RS2_def_struct *rs, int block_size, int *data_block, int *syndromes) {
 	// Calculate one syndrome for each root of rs->GenPoly.
 	// Each syndrome is the evaluation of the message polynomial at a root of rs->GenPoly
 	int nonzero = 0; // Count how many non-zero syndromes are calculated.
@@ -60,10 +60,10 @@ int calc_syndromes(int *data_block, int block_size, int *syndromes, RS2_def_stru
 	return nonzero;
 }
 
-void calc_berlekamp(int *error_locator, int *correction_poly, int *syndromes, RS2_def_struct *rs) {
+void calc_berlekamp(RS2_def_struct *rs, int *syndromes, int *error_locator, int *correction_poly) {
     int next_error_locator[MAX_GENPOLY_ROOTS];
 	error_locator[0] = 1;
-	correction_poly[1] = 1;	// C = x
+	correction_poly[1] = 1;
 	int order_tracker = 0;
 	for (int i = 0; i < rs->NumRoots; i++) {
 		next_error_locator[i] = 0;
@@ -76,17 +76,17 @@ void calc_berlekamp(int *error_locator, int *correction_poly, int *syndromes, RS
 			int x = y - i;
 			e = e ^ GF2Mul(error_locator[i], syndromes[x], rs->GF);
 		}
-        // now update the estimate of V[x]
+        // now update the estimate of the error locator polynomial
 		if (e != 0) {
 			for (int i = 0; i <= order_tracker; i++) {
 				next_error_locator[i] = error_locator[i] ^ GF2Mul(e, correction_poly[i], rs->GF);
 			}
-            // and update the value of C
+            // and update the value of the correction polynomial
 			e = GF2Inv(e, rs->GF);
-			for (int i = 0; i <= rs->NumRoots / 2; i++) {		// need to refine loop limit t, could be based on L?
+			for (int i = 0; i <= rs->NumRoots; i++) {		// refine loop limit?
 				correction_poly[i] = GF2Mul(error_locator[i], e, rs->GF);
 			}
-			for (int i = 0; i <= rs->NumRoots / 2; i++) {	// refine loop limit
+			for (int i = 0; i <= rs->NumRoots; i++) {	// refine loop limit?
 				error_locator[i] = next_error_locator[i];         // this should only happen if e != 0!
 			}
 		}
@@ -101,35 +101,17 @@ void calc_berlekamp(int *error_locator, int *correction_poly, int *syndromes, RS
 	}
 }
 
-int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
-	int syndromes[MAX_GENPOLY_ROOTS];
-    int error_locator[MAX_GENPOLY_ROOTS];
-    int correction_poly[MAX_GENPOLY_ROOTS + 1];
-	int step_factor, order_tracker;
-	int x, y, z, e;
-    
-    // clear out arrays
-	for (int i = 0; i <  rs->NumRoots; i++) {
-		error_locator[i] = 0;
-		correction_poly[i] = 0;
-	}
-	correction_poly[rs->NumRoots] = 0;
-	
-	calc_syndromes(data_block, block_size, syndromes, rs);
-	
-	calc_berlekamp(error_locator, correction_poly, syndromes, rs);
-	
-	
-    // now solve the error locator polynomial to find the error positions
-    // by using the Chien Search
-    // Uses V[i] calculated above
-	rs->ErrorCount = 0;  // rs->error_count is the number of errors found
+int calc_chien(RS2_def_struct *rs, int block_size, int *error_locator) {
+	// Calculate error locations and error count from error locator polynomial.
+	// Brute force search for roots of error locator polynomial. Solutions
+	// found when polynomial evaluates to zero.
+	rs->ErrorCount = 0;
 	for (int j = 0; j < block_size; j++) {
-		x = 0;
-		y = j + rs->FieldOrder - block_size;  // account for code shortening by modifying index variable
+		int x = 0;
+		int y = j + rs->FieldOrder - block_size;  // account for code shortening by modifying index variable
 		for (int i = 1; i <= rs->NumRoots/2; i++) {
 			if (error_locator[i]) {
-				z = y * i;  // calculate power by multiplying exponents
+				int z = y * i;  // calculate power by multiplying exponents
 				z = z + GF2Log(error_locator[i], rs->GF); //multiply by adding exponents
 				while (z > (rs->FieldOrder - 2)) {
 					z = z - rs->FieldOrder + 1;
@@ -139,22 +121,29 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		}
 		x = x ^ error_locator[0];
 		if (x == 0) {
-			printf("\r\nRS Decode Error Location %li: %li", rs->ErrorCount, j);
 			rs->ErrorLocs[rs->ErrorCount] = j;
 			rs->ErrorCount++;
             // Todo: check for an ambiguous solution
             
 		}
 	}
+	return rs->ErrorCount;
+}
 
+void calc_forney(RS2_def_struct *rs, int block_size, int *error_locator, int *correction_poly, int *syndromes) {
 	// Forney algorithm to determine error values
-	// first calculate omega, the error magnitude polynomial
+
+	int e, x, y, z;
+
+	// first calculate the error magnitude polynomial (correction_poly)
 	for (int i = 0; i < rs->ErrorCount; i++) {
 		correction_poly[i] = syndromes[i];
 		for (int j = 1; j <= i; j++) {
 			correction_poly[i] = correction_poly[i] ^ GF2Mul(syndromes[i - j], error_locator[j], rs->GF);
 		}
 	}
+
+
 	for (int i = 0; i < rs->ErrorCount; i++) { // compute an error value for each error location
 		e = block_size - rs->ErrorLocs[i] - 1;
 		z = correction_poly[0];
@@ -171,7 +160,7 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		}
 		z = GF2Mul(z, GF2Pow(e, rs->GF), rs->GF);
 		y = error_locator[1];
-		for (int j = 3; j <= rs->NumRoots / 2; j = j + 2) { // operate on each odd coefficient of V
+		for (int j = 3; j <= rs->NumRoots / 2; j = j + 2) { 
 			x = e * (j - 1);
 			while (x > (rs->FieldOrder - 2)) {
 				x = x + 1 - rs->FieldOrder;
@@ -189,14 +178,39 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		}
 		y = GF2Pow(y, rs->GF);
 		rs->ErrorMags[i] = GF2Mul(y, z, rs->GF);
+		//data_block[rs->ErrorLocs[i]] = data_block[rs->ErrorLocs[i]] ^ rs->ErrorMags[i];
+	}
+}
+
+int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
+	int syndromes[MAX_GENPOLY_ROOTS];
+    int error_locator[MAX_GENPOLY_ROOTS];
+    int correction_poly[MAX_GENPOLY_ROOTS + 1];
+    
+    // clear out arrays
+	for (int i = 0; i <  rs->NumRoots; i++) {
+		error_locator[i] = 0;
+		correction_poly[i] = 0;
+	}
+	correction_poly[rs->NumRoots] = 0;
+	
+	calc_syndromes(rs, block_size, data_block, syndromes);
+	
+	calc_berlekamp(rs, syndromes, error_locator, correction_poly);
+	
+	calc_chien(rs, block_size, error_locator);
+
+	calc_forney(rs, block_size, error_locator, correction_poly, syndromes);
+
+	for (int i = 0; i < rs->ErrorCount; i++) {
 		data_block[rs->ErrorLocs[i]] = data_block[rs->ErrorLocs[i]] ^ rs->ErrorMags[i];
 	}
-	
+
 	// check for success by calculating syndromes (should be zero if no errors)
-	int nonzero = calc_syndromes(data_block, block_size, syndromes, rs);
+	int nonzero = calc_syndromes(rs, block_size, data_block, syndromes);
 	
 	if (nonzero) {
-		return nonzero;
+		return -nonzero;
 	}
 	return rs->ErrorCount; // return number of errors corrected    
 }
