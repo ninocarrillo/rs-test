@@ -136,7 +136,7 @@ void calc_error_value_poly(RS2_def_struct *rs, int *syndromes, int *error_locato
 	for (int i = 0; i < rs->ErrorCount; i++) {
 		error_value_poly[i] = syndromes[i];
 		for (int j = 1; j <= i; j++) {
-			error_value_poly[i] = error_value_poly[i] ^ GF2Mul(syndromes[i - j], error_locator_poly[j], rs->GF);
+			error_value_poly[i] ^= GF2Mul(syndromes[i - j], error_locator_poly[j], rs->GF);
 		}
 	}
 }
@@ -144,25 +144,28 @@ void calc_error_value_poly(RS2_def_struct *rs, int *syndromes, int *error_locato
 void calc_forney(RS2_def_struct *rs, int block_size, int *error_locator_poly, int *error_value_poly, int *syndromes) {
 	// Forney algorithm to determine error values
 
-	int e, x, y, z;
+	int e, x, denominator, numerator;
 	
-	for (int i = 0; i < rs->ErrorCount; i++) { // compute an error value for each error location
-		e = block_size - (rs->ErrorLocs[i] + 1);
-		z = error_value_poly[0];
+	for (int i = 0; i < rs->ErrorCount; i++) {
+		// compute an error value for each error location
+		// Divide the error value polynomial by the derivitave of the error locator polynomial,
+		// both evaluated at the index value of the error location.
+		e = (block_size - 1) - rs->ErrorLocs[i];
+		numerator = error_value_poly[0];
 		for (int j = 1; j < rs->ErrorCount; j++) { // calculate numerator
-			x = GF2Clamp((rs->FieldOrder - 1) - (e * j), rs->GF);
-			z ^= GF2Mul(error_value_poly[j], GF2Pow(x, rs->GF), rs->GF);
+			x = GF2Mod((rs->FieldOrder - 1) - (e * j), rs->GF);
+			numerator ^= GF2Mul(error_value_poly[j], GF2Pow(x, rs->GF), rs->GF);
 		}
-		z = GF2Mul(z, GF2Pow(e, rs->GF), rs->GF);
+		numerator = GF2Mul(numerator, GF2Pow(e, rs->GF), rs->GF);
 
-		y = error_locator_poly[1];
-		for (int j = 3; j <= rs->NumRoots / 2; j = j + 2) { 
-			x = GF2Mod(e * (j - 1), rs->GF);
-			x = rs->FieldOrder - (x + 1);
-			y = y ^ GF2Mul(error_locator_poly[j], GF2Pow(x, rs->GF), rs->GF);
+		denominator = error_locator_poly[1];
+		for (int j = 3; j <= rs->NumRoots / 2; j += 2) {
+			x = GF2Mod((rs->FieldOrder - 1) - (e * (j - 1)), rs->GF);
+			denominator ^= GF2Mul(error_locator_poly[j], GF2Pow(x, rs->GF), rs->GF);
 		}
-		y = GF2Pow(GF2Clamp(rs->FieldOrder - (GF2Log(y, rs->GF) + 1), rs->GF), rs->GF);
-		rs->ErrorMags[i] = GF2Mul(y, z, rs->GF);
+		
+		// Take inverse of denominator term so division becomes multiplication.
+		rs->ErrorMags[i] = GF2Mul(GF2Inv(denominator, rs->GF), numerator, rs->GF);
 	}
 }
 

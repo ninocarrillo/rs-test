@@ -159,10 +159,10 @@ int main(int arg_count, char* arg_values[]) {
 			// }
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
-			// printf("\r\nError Vector:");
-			// for (int i = 0; i < block_size; i++) {
-				// printf(" %lX", error_vector[i]);
-			// }
+			printf("\r\n             Error Vector:");
+			for (int i = 0; i < block_size; i++) {
+				printf(" %lX", error_vector[i]);
+			}
 
 			CombineVectors(original_message, error_vector, corrupt_message, block_size);
 			// printf("\r\nCorrupt Message:");
@@ -194,21 +194,21 @@ int main(int arg_count, char* arg_values[]) {
 				// }				
 			}
 			//if (error_count == (block_size-message_size)/2) {
-				// if (errors > 0) {
-				// 	printf("\r\nEdge Case Failure Error Vector:");
-				// 	for (int i = 0; i < block_size; i++) {
-				// 		printf(" %i", error_vector[i]);
-				// 	}
-				// 	printf("\r\nDetected error locations: ");
-				// 	for (int i = 0; i < rs.ErrorCount; i++) {
-				// 		printf(" %i", rs.ErrorLocs[i]);
-				// 	}
-				// 	printf("\r\nDetected error magnitudes: ");
-				// 	for (int i = 0; i < rs.ErrorCount; i++) {
-				// 		printf(" %i", rs.ErrorMags[i]);
-				// 	}
+				if (rs.ErrorCount > 0) {
+					printf("\r\n          Calculated Error Vector:");
+					for (int i = 0; i < block_size; i++) {
+						printf(" %i", error_vector[i]);
+					}
+					printf("\r\n          Detected error locations: ");
+					for (int i = 0; i < rs.ErrorCount; i++) {
+						printf(" %i", rs.ErrorLocs[i]);
+					}
+					printf("\r\n          Detected error magnitudes: ");
+					for (int i = 0; i < rs.ErrorCount; i++) {
+						printf(" %i", rs.ErrorMags[i]);
+					}
 
-				// }
+				}
 			//}
 		}
 	}
