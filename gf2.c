@@ -26,6 +26,16 @@ int GF2Inv(int i, GF2_def_struct *gf) {
     return gf->Inverse[i & gf->Mask];
 }
 
+int GF2Mod(int i, GF2_def_struct *gf) {
+	while (i > (gf->Order - 2)) {
+		i -= (gf->Order - 1);
+	}
+	while(i < 0) {
+		i += (gf->Order - 1);
+	}
+	return i;
+}
+
 int InitGF2(int genpoly, GF2_def_struct *gf) {
 	if (!(genpoly & 1)) {
 		// Generator polynomial must be odd.

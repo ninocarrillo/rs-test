@@ -153,10 +153,10 @@ int main(int arg_count, char* arg_values[]) {
 			// }
 			// Encode message in Reed Solomon block.
 			RSEncode(original_message, message_size, &rs);
-			printf("\r\nEncodedMessage:");
-			for (int i = 0; i < block_size; i++) {
-				printf(" %X", original_message[i]);
-			}
+			// printf("\r\nEncodedMessage:");
+			// for (int i = 0; i < block_size; i++) {
+			// 	printf(" %X", original_message[i]);
+			// }
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
 			// printf("\r\nError Vector:");
@@ -193,6 +193,23 @@ int main(int arg_count, char* arg_values[]) {
 					// printf(" %lX,%lX", corrupt_message[i], original_message[i]);
 				// }				
 			}
+			//if (error_count == (block_size-message_size)/2) {
+				if (errors > 0) {
+					printf("\r\nEdge Case Failure Error Vector:");
+					for (int i = 0; i < block_size; i++) {
+						printf(" %i", error_vector[i]);
+					}
+					printf("\r\nDetected error locations: ");
+					for (int i = 0; i < rs.ErrorCount; i++) {
+						printf(" %i", rs.ErrorLocs[i]);
+					}
+					printf("\r\nDetected error magnitudes: ");
+					for (int i = 0; i < rs.ErrorCount; i++) {
+						printf(" %i", rs.ErrorMags[i]);
+					}
+
+				}
+			//}
 		}
 	}
 

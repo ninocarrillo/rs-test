@@ -56,4 +56,6 @@ int GF2Log(int, GF2_def_struct*);
 // Returns 1/Arg.
 int GF2Inv(int, GF2_def_struct*);
 
+int GF2Mod(int, GF2_def_struct*);
+
 #endif	/* GF2_H */
