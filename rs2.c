@@ -115,7 +115,7 @@ int calc_chien(RS2_def_struct *rs) {
 	for (int candidate_location = 0; candidate_location < rs->BlockSize; candidate_location++) {
 		int evaluation = rs->ErrorLocatorPoly[0];
 		// account for code shortening by modifying candidate_root based on block size and field order:
-		int candidate_root = candidate_location + rs->FieldOrder - rs->BlockSize;  
+		int candidate_root = (candidate_location + rs->FieldOrder) - rs->BlockSize;  
 		for (int i = 1; i <= rs->NumRoots/2; i++) {
 			if (rs->ErrorLocatorPoly[i]) {
 				// Calculate power by multiplying exponents, then multiply by adding exponents:
