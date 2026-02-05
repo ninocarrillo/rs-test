@@ -20,6 +20,7 @@ typedef struct {
     int Genpoly[MAX_GENPOLY_ROOTS + 1];
     int ErrorIndices[MAX_GENPOLY_ROOTS];
     int ErrorMags[MAX_GENPOLY_ROOTS];
+	int ErrorLocatorPoly[MAX_GENPOLY_ROOTS];
 	int ErrorLocatorRoots[MAX_GENPOLY_ROOTS];
     int FirstRoot;
     int NumRoots;
