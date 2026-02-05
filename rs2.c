@@ -147,25 +147,22 @@ void calc_error_value_poly(RS2_def_struct *rs) {
 void calc_forney(RS2_def_struct *rs) {
 	// Forney algorithm to determine error values
 
-	int e, x, denominator, numerator;
+	int denominator, numerator;
 	
 	for (int i = 0; i < rs->ErrorCount; i++) {
 		// compute an error value for each error location
 		// Divide the error value polynomial by the derivitave of the error locator polynomial,
 		// both evaluated at the index value of the error location.
-		e = GF2Mod( - rs->ErrorLocatorRoots[i], rs->GF);
-		printf("\r\n                     --------- e: %i", e);
+		printf("\r\n                     --------- e: %i", rs->ErrorLocatorRoots[i]);
 		numerator = rs->ErrorMagPoly[0];
 		for (int j = 1; j < rs->ErrorCount; j++) { // calculate numerator
-			x = GF2Mod((rs->FieldOrder - 1) - (e * j), rs->GF);
-			numerator ^= GF2Mul(rs->ErrorMagPoly[j], GF2Pow(x, rs->GF), rs->GF);
+			numerator ^= GF2Mul(rs->ErrorMagPoly[j], GF2Pow(GF2Mod(rs->ErrorLocatorRoots[i] * j, rs->GF), rs->GF), rs->GF);
 		}
-		numerator = GF2Mul(numerator, GF2Pow(e, rs->GF), rs->GF);
+		numerator = GF2Mul(numerator, GF2Pow(GF2Mod(-rs->ErrorLocatorRoots[i], rs->GF), rs->GF), rs->GF);
 
 		denominator = rs->ErrorLocatorPoly[1];
 		for (int j = 3; j <= rs->NumRoots / 2; j += 2) {
-			x = GF2Mod((rs->FieldOrder - 1) - (e * (j - 1)), rs->GF);
-			denominator ^= GF2Mul(rs->ErrorLocatorPoly[j], GF2Pow(x, rs->GF), rs->GF);
+			denominator ^= GF2Mul(rs->ErrorLocatorPoly[j], GF2Pow(GF2Mod(rs->ErrorLocatorRoots[i] * (j - 1), rs->GF), rs->GF), rs->GF);
 		}
 		
 		// Take inverse of denominator term so division becomes multiplication.
