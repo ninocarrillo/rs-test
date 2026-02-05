@@ -108,22 +108,23 @@ int calc_chien(RS2_def_struct *rs, int block_size, int *error_locator_poly) {
 	// Brute force search for roots of error locator polynomial. Solutions
 	// found when polynomial evaluates to zero.
 	rs->ErrorCount = 0;
-	for (int j = 0; j < block_size; j++) {
-		int x = 0;
-		int y = j + rs->FieldOrder - block_size;  // account for code shortening by modifying index variable
+	// Step through each index position in the code block
+	for (int candidate_location = 0; candidate_location < block_size; candidate_location++) { 
+		int evaluation = 0;
+		// account for code shortening by modifying candidate_root based on block size and field order:
+		int candidate_root = candidate_location + rs->FieldOrder - block_size;  
 		for (int i = 1; i <= rs->NumRoots/2; i++) {
 			if (error_locator_poly[i]) {
-				int z = y * i;  // calculate power by multiplying exponents
-				z = z + GF2Log(error_locator_poly[i], rs->GF); //multiply by adding exponents
-				while (z > (rs->FieldOrder - 2)) {
-					z = z - rs->FieldOrder + 1;
-				}
-				x = x ^ GF2Pow(z, rs->GF);
+				// Calculate power by multiplying exponents, then multiply by adding exponents:
+				int x = (candidate_root * i) + GF2Log(error_locator_poly[i], rs->GF);
+				// Sum the evaluation, xor is addition in GF
+				evaluation ^= GF2Pow(GF2Mod(x, rs->GF), rs->GF);
 			}
 		}
-		x = x ^ error_locator_poly[0];
-		if (x == 0) {
-			rs->ErrorLocs[rs->ErrorCount] = j;
+		evaluation ^= error_locator_poly[0];
+		if (evaluation == 0) {
+			rs->ErrorIndices[rs->ErrorCount] = candidate_location;
+			rs->ErrorLocatorRoots[rs->ErrorCount] = candidate_root;
 			rs->ErrorCount++;
             // Todo: check for an ambiguous solution
             
@@ -150,7 +151,7 @@ void calc_forney(RS2_def_struct *rs, int block_size, int *error_locator_poly, in
 		// compute an error value for each error location
 		// Divide the error value polynomial by the derivitave of the error locator polynomial,
 		// both evaluated at the index value of the error location.
-		e = (block_size - 1) - rs->ErrorLocs[i];
+		e = (block_size - 1) - rs->ErrorIndices[i];
 		numerator = error_value_poly[0];
 		for (int j = 1; j < rs->ErrorCount; j++) { // calculate numerator
 			x = GF2Mod((rs->FieldOrder - 1) - (e * j), rs->GF);
@@ -193,7 +194,7 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 
 	for (int i = 0; i < rs->ErrorCount; i++) {
 		// Correct each detected error
-		data_block[rs->ErrorLocs[i]] = data_block[rs->ErrorLocs[i]] ^ rs->ErrorMags[i];
+		data_block[rs->ErrorIndices[i]] = data_block[rs->ErrorIndices[i]] ^ rs->ErrorMags[i];
 	}
 
 	// check for success by calculating syndromes (should be zero if no errors)

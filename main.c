@@ -199,9 +199,13 @@ int main(int arg_count, char* arg_values[]) {
 					for (int i = 0; i < block_size; i++) {
 						printf(" %i", error_vector[i]);
 					}
-					printf("\r\n          Detected error locations: ");
+					printf("\r\n          Detected error indices: ");
 					for (int i = 0; i < rs.ErrorCount; i++) {
-						printf(" %i", rs.ErrorLocs[i]);
+						printf(" %i", rs.ErrorIndices[i]);
+					}
+					printf("\r\n          Detected error roots: ");
+					for (int i = 0; i < rs.ErrorCount; i++) {
+						printf(" %i", rs.ErrorLocatorRoots[i]);
 					}
 					printf("\r\n          Detected error magnitudes: ");
 					for (int i = 0; i < rs.ErrorCount; i++) {

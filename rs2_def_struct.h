@@ -18,8 +18,9 @@
 typedef struct {
     GF2_def_struct *GF;
     int Genpoly[MAX_GENPOLY_ROOTS + 1];
-    int ErrorLocs[MAX_GENPOLY_ROOTS];
+    int ErrorIndices[MAX_GENPOLY_ROOTS];
     int ErrorMags[MAX_GENPOLY_ROOTS];
+	int ErrorLocatorRoots[MAX_GENPOLY_ROOTS];
     int FirstRoot;
     int NumRoots;
     int FieldOrder;
