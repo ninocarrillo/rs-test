@@ -10,7 +10,6 @@
 #ifndef RS2_DEF_STRUCT_H
 #define	RS2_DEF_STRUCT_H
 
-#include "stdint.h"
 #include "gf2_def_struct.h"
 
 // Change to suit your application. Bigger = more memory allocated.

@@ -28,13 +28,7 @@ int GF2Inv(int i, GF2_def_struct *gf) {
 }
 
 int GF2Mod(int i, GF2_def_struct *gf) {
-	while (i > (gf->Order - 2)) {
-		i -= (gf->Order - 1);
-	}
-	while (i < 1) {
-		i += (gf->Order - 1);
-	}
-	return i;
+	return i % (gf->Order - 1);
 }
 
 int GF2Clamp(int i, GF2_def_struct *gf) {
@@ -89,10 +83,7 @@ int GF2Mul(int a, int b, GF2_def_struct *gf) {
 	}
 	a = gf->Index[a & gf->Mask];
 	b = gf->Index[b & gf->Mask];
-	a = a + b;
-	if (a > (gf->Order - 2)) {
-		a = a - (gf->Order - 1);
-	}
+	a = (a + b) % (gf->Order - 1);
 	return gf->Table[a & gf->Mask];
 }
 
@@ -107,10 +98,7 @@ int GF2Div(int a_arg, int b_arg, GF2_def_struct *gf) {
 	}
 	a = gf->Index[a & gf->Mask];
 	b = gf->Index[b & gf->Mask];
-	a = a - b;
-	if (a < 0) {
-		a = a + (gf->Order - 1);
-	}
+	a = (a - b) % (gf->Order - 1);
 	return gf->Table[a & gf->Mask];
 }
 
