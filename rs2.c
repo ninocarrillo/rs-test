@@ -146,39 +146,29 @@ void calc_forney(RS2_def_struct *rs, int block_size, int *error_locator_poly, in
 
 	for (int i = 0; i < rs->ErrorCount; i++) { // compute an error value for each error location
 		e = block_size - (rs->ErrorLocs[i] + 1);
-
-		
 		z = error_value_poly[0];
 		for (int j = 1; j < rs->ErrorCount; j++) { // calculate numerator
-			x = (rs->FieldOrder - 1) - (e * j);
-
-			x = GF2Mod(x, rs->GF);
-
-			z = z ^ GF2Mul(error_value_poly[j], GF2Pow(x, rs->GF), rs->GF);
+			x = GF2Mod((rs->FieldOrder - 1) - (e * j), rs->GF);
+			z ^= GF2Mul(error_value_poly[j], GF2Pow(x, rs->GF), rs->GF);
 		}
 		z = GF2Mul(z, GF2Pow(e, rs->GF), rs->GF);
+
 		y = error_locator_poly[1];
 		for (int j = 3; j <= rs->NumRoots / 2; j = j + 2) { 
 			x = e * (j - 1);
-			while (x > (rs->FieldOrder - 2)) {
-				x = x + 1 - rs->FieldOrder;
-			}
+			GF2Mod(x, rs->GF);
+			// while (x > (rs->FieldOrder - 2)) {
+			// 	x = (x + 1) - rs->FieldOrder;
+			// }
 			x = rs->FieldOrder - x - 1;
 			while (x > (rs->FieldOrder - 2)) {
-				x = x + 1 - rs->FieldOrder;
+				x = (x + 1) - rs->FieldOrder;
 			}
+			//GF2Mod(x, rs->GF);
 			y = y ^ GF2Mul(error_locator_poly[j], GF2Pow(x, rs->GF), rs->GF);
 		}
-		y = GF2Log(y, rs->GF);
-		y = rs->FieldOrder - y - 1;
-		if (y == (rs->FieldOrder - 1)) {
-			y = 0;
-		}
-
-
-		y = GF2Pow(y, rs->GF);
+		y = GF2Pow(GF2Mod(rs->FieldOrder - (GF2Log(y, rs->GF) + 1), rs->GF), rs->GF);
 		rs->ErrorMags[i] = GF2Mul(y, z, rs->GF);
-
 	}
 }
 
