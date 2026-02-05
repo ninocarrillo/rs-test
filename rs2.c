@@ -160,11 +160,11 @@ void calc_forney(RS2_def_struct *rs, int block_size, int *error_locator_poly, in
 			// while (x > (rs->FieldOrder - 2)) {
 			// 	x = (x + 1) - rs->FieldOrder;
 			// }
-			x = rs->FieldOrder - x - 1;
+			x = rs->FieldOrder - (x + 1);
 			while (x > (rs->FieldOrder - 2)) {
 				x = (x + 1) - rs->FieldOrder;
 			}
-			//GF2Mod(x, rs->GF);
+			GF2Mod(x, rs->GF);
 			y = y ^ GF2Mul(error_locator_poly[j], GF2Pow(x, rs->GF), rs->GF);
 		}
 		y = GF2Pow(GF2Mod(rs->FieldOrder - (GF2Log(y, rs->GF) + 1), rs->GF), rs->GF);

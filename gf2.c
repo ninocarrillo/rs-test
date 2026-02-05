@@ -1,4 +1,5 @@
 #include "gf2.h"
+#include <stdio.h>
 
 void lfsr_step(GF2_def_struct *gf) {
 // utilize Galois configuration to implement LFSR
@@ -28,9 +29,11 @@ int GF2Inv(int i, GF2_def_struct *gf) {
 
 int GF2Mod(int i, GF2_def_struct *gf) {
 	while (i > (gf->Order - 2)) {
+		printf("\r\n       Mod %i", i);
 		i -= (gf->Order - 1);
 	}
-	while(i < 0) {
+	while (i < 0) {
+		printf("\r\n       Mod %i", i);
 		i += (gf->Order - 1);
 	}
 	return i;
