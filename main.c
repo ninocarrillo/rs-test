@@ -217,6 +217,14 @@ int main(int arg_count, char* arg_values[]) {
 					for (int i = 0; i < rs.ErrorCount; i++) {
 						printf(" %i", rs.ErrorMags[i]);
 					}
+					printf("\r\n          Error Locator Poly:");
+					for (int i = 0; i <= rs.NumRoots/2; i++) {
+						printf(" %i", rs.ErrorLocatorPoly[i]);
+					}
+					printf("\r\n          Error Magnitude Poly:");
+					for (int i = 0; i <= rs.NumRoots/2; i++) {
+						printf(" %i", rs.ErrorMagPoly[i]);
+					}
 					printf("\r\n          RS Gen Poly:");
 					for (int i = 0; i < rs.NumRoots+1; i++) {
 						printf(" %i", rs.Genpoly[i]);
