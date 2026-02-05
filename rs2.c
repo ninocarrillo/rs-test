@@ -60,14 +60,16 @@ int calc_syndromes(RS2_def_struct *rs, int block_size, int *data_block, int *syn
 	return nonzero;
 }
 
-void calc_berlekamp(RS2_def_struct *rs, int *syndromes, int *error_locator_poly, int *error_value_poly) {
+void calc_berlekamp(RS2_def_struct *rs, int *syndromes, int *error_locator_poly) {
     int next_error_locator_poly[MAX_GENPOLY_ROOTS];
+    int correction_poly[MAX_GENPOLY_ROOTS];
 	error_locator_poly[0] = 1;
-	error_value_poly[1] = 1;
 	int order_tracker = 0;
 	for (int i = 0; i < rs->NumRoots; i++) {
 		next_error_locator_poly[i] = 0;
+		correction_poly[i] = 0;
 	}
+	correction_poly[1] = 1;
 	for (int step_factor = 1; step_factor <= rs->NumRoots; step_factor++) {
         // first calculate error value, e
 		int y = step_factor - 1;
@@ -79,12 +81,12 @@ void calc_berlekamp(RS2_def_struct *rs, int *syndromes, int *error_locator_poly,
         // now update the estimate of the error locator polynomial
 		if (e != 0) {
 			for (int i = 0; i <= order_tracker; i++) {
-				next_error_locator_poly[i] = error_locator_poly[i] ^ GF2Mul(e, error_value_poly[i], rs->GF);
+				next_error_locator_poly[i] = error_locator_poly[i] ^ GF2Mul(e, correction_poly[i], rs->GF);
 			}
             // and update the value of the correction polynomial
 			e = GF2Inv(e, rs->GF);
 			for (int i = 0; i <= rs->NumRoots; i++) {		// refine loop limit?
-				error_value_poly[i] = GF2Mul(error_locator_poly[i], e, rs->GF);
+				correction_poly[i] = GF2Mul(error_locator_poly[i], e, rs->GF);
 			}
 			for (int i = 0; i <= rs->NumRoots; i++) {	// refine loop limit?
 				error_locator_poly[i] = next_error_locator_poly[i];         // this should only happen if e != 0!
@@ -95,9 +97,9 @@ void calc_berlekamp(RS2_def_struct *rs, int *syndromes, int *error_locator_poly,
 		}
         // multiply error_value_poly by x (increase power by one)
 		for (int i = rs->NumRoots; i > 0; i--) {
-			error_value_poly[i] = error_value_poly[i - 1];
+			correction_poly[i] = correction_poly[i - 1];
 		}
-		error_value_poly[0] = 0;
+		correction_poly[0] = 0;
 	}
 }
 
@@ -130,19 +132,20 @@ int calc_chien(RS2_def_struct *rs, int block_size, int *error_locator_poly) {
 	return rs->ErrorCount;
 }
 
+
+
 void calc_forney(RS2_def_struct *rs, int block_size, int *error_locator_poly, int *error_value_poly, int *syndromes) {
 	// Forney algorithm to determine error values
 
 	int e, x, y, z;
 
-	// first calculate error_value_poly
+
 	for (int i = 0; i < rs->ErrorCount; i++) {
 		error_value_poly[i] = syndromes[i];
 		for (int j = 1; j <= i; j++) {
 			error_value_poly[i] = error_value_poly[i] ^ GF2Mul(syndromes[i - j], error_locator_poly[j], rs->GF);
 		}
 	}
-
 
 	for (int i = 0; i < rs->ErrorCount; i++) { // compute an error value for each error location
 		e = block_size - (rs->ErrorLocs[i] + 1);
@@ -178,7 +181,7 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 	
 	calc_syndromes(rs, block_size, data_block, syndromes);
 	
-	calc_berlekamp(rs, syndromes, error_locator_poly, error_value_poly);
+	calc_berlekamp(rs, syndromes, error_locator_poly);
 	
 	calc_chien(rs, block_size, error_locator_poly);
 

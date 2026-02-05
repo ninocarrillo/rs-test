@@ -29,11 +29,9 @@ int GF2Inv(int i, GF2_def_struct *gf) {
 
 int GF2Mod(int i, GF2_def_struct *gf) {
 	while (i > (gf->Order - 2)) {
-		printf("\r\n       Mod %i", i);
 		i -= (gf->Order - 1);
 	}
 	while (i < 1) {
-		printf("\r\n       Mod %i", i);
 		i += (gf->Order - 1);
 	}
 	return i;
