@@ -18,13 +18,17 @@
 typedef struct {
     GF2_def_struct *GF;
     int Genpoly[MAX_GENPOLY_ROOTS + 1];
+	int Syndromes[MAX_GENPOLY_ROOTS];
     int ErrorIndices[MAX_GENPOLY_ROOTS];
+	int ErrorMagPoly[MAX_GENPOLY_ROOTS];
     int ErrorMags[MAX_GENPOLY_ROOTS];
 	int ErrorLocatorPoly[MAX_GENPOLY_ROOTS];
 	int ErrorLocatorRoots[MAX_GENPOLY_ROOTS];
+	int *DataBlock;
     int FirstRoot;
     int NumRoots;
     int FieldOrder;
+	int BlockSize;
     int ErrorCount;
 } RS2_def_struct;
 
