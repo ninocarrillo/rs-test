@@ -32,9 +32,16 @@ int GF2Mod(int i, GF2_def_struct *gf) {
 		printf("\r\n       Mod %i", i);
 		i -= (gf->Order - 1);
 	}
-	while (i < 0) {
+	while (i < 1) {
 		printf("\r\n       Mod %i", i);
 		i += (gf->Order - 1);
+	}
+	return i;
+}
+
+int GF2Clamp(int i, GF2_def_struct *gf) {
+	while (i > (gf->Order - 2)) {
+		i -= (gf->Order - 1);
 	}
 	return i;
 }
