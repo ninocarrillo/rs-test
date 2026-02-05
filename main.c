@@ -140,8 +140,9 @@ int main(int arg_count, char* arg_values[]) {
 
 	printf("\r\nStarting %i runs.\r\n", (parity_size + 1) * run_count);
 	int master_count = 1;
+	int max_errors = parity_size / 2;
 	
-	for (int error_count = 0; error_count <= parity_size; error_count++) {
+	for (int error_count = 0; error_count <= max_errors; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
 			// printf("\r\n\nError Count %i, Run %i, ", error_count, run_number);
 			printf("\r%i", master_count++);
@@ -159,10 +160,10 @@ int main(int arg_count, char* arg_values[]) {
 			// }
 
 			GenErrorVector(error_vector, gf.Order - 1, block_size, error_count);
-			printf("\r\n             Error Vector:");
-			for (int i = 0; i < block_size; i++) {
-				printf(" %lX", error_vector[i]);
-			}
+			// printf("\r\n             Error Vector:");
+			// for (int i = 0; i < block_size; i++) {
+				// printf(" %i", error_vector[i]);
+			// }
 
 			CombineVectors(original_message, error_vector, corrupt_message, block_size);
 			// printf("\r\nCorrupt Message:");
@@ -195,9 +196,14 @@ int main(int arg_count, char* arg_values[]) {
 			}
 			//if (error_count == (block_size-message_size)/2) {
 				if (rs.ErrorCount > 0) {
-					printf("\r\n          Calculated Error Vector:");
+					
+					printf("\r\n          Actual Error Vector:");
 					for (int i = 0; i < block_size; i++) {
 						printf(" %i", error_vector[i]);
+					}
+					printf("\r\n          Syndromes:");
+					for (int i = 0; i < rs.NumRoots; i++) {
+						printf(" %i", rs.SavedSyndromes[i]);
 					}
 					printf("\r\n          Detected error indices: ");
 					for (int i = 0; i < rs.ErrorCount; i++) {
@@ -211,26 +217,29 @@ int main(int arg_count, char* arg_values[]) {
 					for (int i = 0; i < rs.ErrorCount; i++) {
 						printf(" %i", rs.ErrorMags[i]);
 					}
-
+					printf("\r\n          RS Gen Poly:");
+					for (int i = 0; i < rs.NumRoots+1; i++) {
+						printf(" %i", rs.Genpoly[i]);
+					}
 				}
 			//}
 		}
 	}
 
 	printf("\r\nDecode Success by Error Count:");
-	for (int i = 0; i <= parity_size; i++) {
+	for (int i = 0; i <= max_errors; i++) {
 		printf("\r\n%i, %i", i, successes[i]);
 	}
 	printf("\r\nDecoder Indicated Failures by Error Count:");
-	for (int i = 0; i <= parity_size; i++) {
+	for (int i = 0; i <= max_errors; i++) {
 		printf("\r\n%i, %i", i, decoder_indicated_failures[i]);
 	}
 	printf("\r\nActual Decode Failures by Error Count:");
-	for (int i = 0; i <= parity_size; i++) {
+	for (int i = 0; i <= max_errors; i++) {
 		printf("\r\n%i, %i", i, failures[i]);
 	}
 	printf("\r\nUndetected Decode Failures by Error Count:");
-	for (int i = 0; i <= parity_size; i++) {
+	for (int i = 0; i <= max_errors; i++) {
 		printf("\r\n%i, %i", i, undetected_failures[i]);
 	}
 	printf("\r\nDone.\r\n");

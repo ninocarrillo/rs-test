@@ -60,6 +60,12 @@ int calc_syndromes(RS2_def_struct *rs) {
 	return nonzero;
 }
 
+void save_syndromes(RS2_def_struct *rs) {
+	for (int i = 0; i < rs->NumRoots; i++) {
+		rs->SavedSyndromes[i] = rs->Syndromes[i];
+	}
+}
+
 void calc_berlekamp(RS2_def_struct *rs) {
     int next_poly[MAX_GENPOLY_ROOTS];
     int correction_poly[MAX_GENPOLY_ROOTS];
@@ -146,20 +152,19 @@ void calc_error_value_poly(RS2_def_struct *rs) {
 
 void calc_forney(RS2_def_struct *rs) {
 	// Forney algorithm to determine error values
-
 	int denominator, numerator;
-	
 	for (int i = 0; i < rs->ErrorCount; i++) {
 		// compute an error value for each error location
 		// Divide the error value polynomial by the derivitave of the error locator polynomial,
-		// both evaluated at the index value of the error location.
+		// both evaluated at the root of the error locator polynomial corresponding to the error location.
 		printf("\r\n                     --------- e: %i", rs->ErrorLocatorRoots[i]);
 		numerator = rs->ErrorMagPoly[0];
 		for (int j = 1; j < rs->ErrorCount; j++) { // calculate numerator
 			numerator ^= GF2Mul(rs->ErrorMagPoly[j], GF2Pow(GF2Mod(rs->ErrorLocatorRoots[i] * j, rs->GF), rs->GF), rs->GF);
 		}
+		// Apply adjustment for first consecutive root:
 		numerator = GF2Mul(numerator, GF2Pow(GF2Mod(-rs->ErrorLocatorRoots[i], rs->GF), rs->GF), rs->GF);
-
+		
 		denominator = rs->ErrorLocatorPoly[1];
 		for (int j = 3; j <= rs->NumRoots / 2; j += 2) {
 			denominator ^= GF2Mul(rs->ErrorLocatorPoly[j], GF2Pow(GF2Mod(rs->ErrorLocatorRoots[i] * (j - 1), rs->GF), rs->GF), rs->GF);
@@ -188,6 +193,8 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 		// Correct each detected error
 		data_block[rs->ErrorIndices[i]] = data_block[rs->ErrorIndices[i]] ^ rs->ErrorMags[i];
 	}
+
+	save_syndromes(rs);
 
 	// check for success by calculating syndromes (should be zero if no errors)
 	int nonzero = calc_syndromes(rs);
