@@ -153,8 +153,8 @@ void calc_forney(RS2_def_struct *rs) {
 		// compute an error value for each error location
 		// Divide the error value polynomial by the derivitave of the error locator polynomial,
 		// both evaluated at the index value of the error location.
-		//e = (rs->BlockSize - 1) - rs->ErrorIndices[i];
-		e = (rs->FieldOrder-1) - rs->ErrorLocatorRoots[i];
+		e = GF2Mod( - rs->ErrorLocatorRoots[i], rs->GF);
+		printf("\r\n                     --------- e: %i", e);
 		numerator = rs->ErrorMagPoly[0];
 		for (int j = 1; j < rs->ErrorCount; j++) { // calculate numerator
 			x = GF2Mod((rs->FieldOrder - 1) - (e * j), rs->GF);
