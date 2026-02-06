@@ -140,7 +140,7 @@ int main(int arg_count, char* arg_values[]) {
 
 	printf("\r\nStarting %i runs.\r\n", (parity_size + 1) * run_count);
 	int master_count = 1;
-	int max_errors = parity_size / 2;
+	int max_errors = parity_size;
 	
 	for (int error_count = 0; error_count <= max_errors; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
@@ -150,7 +150,7 @@ int main(int arg_count, char* arg_values[]) {
 			GenRandomMessage(original_message, gf.Order - 1, message_size);
 			// printf("\r\nMessage:");
 			// for (int i = 0; i < message_size; i++) {
-				// printf(" %lX", original_message[i]);
+				// printf(" %X", original_message[i]);
 			// }
 			// Encode message in Reed Solomon block.
 			RSEncode(original_message, message_size, &rs);
@@ -168,7 +168,7 @@ int main(int arg_count, char* arg_values[]) {
 			CombineVectors(original_message, error_vector, corrupt_message, block_size);
 			// printf("\r\nCorrupt Message:");
 			// for (int i = 0; i < block_size; i++) {
-				// printf(" %lX", corrupt_message[i]);
+				// printf(" %X", corrupt_message[i]);
 			// }
 
 			int corrected_count = RSDecode(corrupt_message, block_size, &rs);
@@ -177,7 +177,7 @@ int main(int arg_count, char* arg_values[]) {
 			}
 			// printf("\r\nCorrected %i errors in message:", corrected_count);
 			// for (int i = 0; i < block_size; i++) {
-				// printf(" %lX", corrupt_message[i]);
+				// printf(" %X", corrupt_message[i]);
 			// }
 
 			int errors = CompareVectors(corrupt_message, original_message, block_size);
@@ -191,46 +191,44 @@ int main(int arg_count, char* arg_values[]) {
 				successes[error_count]++;
 				// printf("\r\nSuccessful message:", corrected_count);
 				// for (int i = 0; i < block_size; i++) {
-					// printf(" %lX,%lX", corrupt_message[i], original_message[i]);
+					// printf(" %X,%X", corrupt_message[i], original_message[i]);
 				// }				
 			}
-			//if (error_count == (block_size-message_size)/2) {
-				if (rs.ErrorCount > 0) {
-					
-					printf("\r\n          Actual Error Vector:");
-					for (int i = 0; i < block_size; i++) {
-						printf(" %i", error_vector[i]);
-					}
-					printf("\r\n          Syndromes:");
-					for (int i = 0; i < rs.NumRoots; i++) {
-						printf(" %i", rs.SavedSyndromes[i]);
-					}
-					printf("\r\n          Detected error indices: ");
-					for (int i = 0; i < rs.ErrorCount; i++) {
-						printf(" %i", rs.ErrorIndices[i]);
-					}
-					printf("\r\n          Detected error roots: ");
-					for (int i = 0; i < rs.ErrorCount; i++) {
-						printf(" %i", rs.ErrorLocatorRoots[i]);
-					}
-					printf("\r\n          Detected error magnitudes: ");
-					for (int i = 0; i < rs.ErrorCount; i++) {
-						printf(" %i", rs.ErrorMags[i]);
-					}
-					printf("\r\n          Error Locator Poly:");
-					for (int i = 0; i <= rs.NumRoots/2; i++) {
-						printf(" %i", rs.ErrorLocatorPoly[i]);
-					}
-					printf("\r\n          Error Magnitude Poly:");
-					for (int i = 0; i <= rs.NumRoots/2; i++) {
-						printf(" %i", rs.ErrorMagPoly[i]);
-					}
-					printf("\r\n          RS Gen Poly:");
-					for (int i = 0; i < rs.NumRoots+1; i++) {
-						printf(" %i", rs.Genpoly[i]);
-					}
-				}
-			//}
+			// if (rs.ErrorCount > 0) {
+				
+			// 	printf("\r\n          Actual Error Vector:");
+			// 	for (int i = 0; i < block_size; i++) {
+			// 		printf(" %i", error_vector[i]);
+			// 	}
+			// 	printf("\r\n          Syndromes:");
+			// 	for (int i = 0; i < rs.NumRoots; i++) {
+			// 		printf(" %i", rs.SavedSyndromes[i]);
+			// 	}
+			// 	printf("\r\n          Detected error indices: ");
+			// 	for (int i = 0; i < rs.ErrorCount; i++) {
+			// 		printf(" %i", rs.ErrorIndices[i]);
+			// 	}
+			// 	printf("\r\n          Detected error roots: ");
+			// 	for (int i = 0; i < rs.ErrorCount; i++) {
+			// 		printf(" %i", rs.ErrorLocatorRoots[i]);
+			// 	}
+			// 	printf("\r\n          Detected error magnitudes: ");
+			// 	for (int i = 0; i < rs.ErrorCount; i++) {
+			// 		printf(" %i", rs.ErrorMags[i]);
+			// 	}
+			// 	printf("\r\n          Error Locator Poly:");
+			// 	for (int i = 0; i <= rs.NumRoots/2; i++) {
+			// 		printf(" %i", rs.ErrorLocatorPoly[i]);
+			// 	}
+			// 	printf("\r\n          Error Magnitude Poly:");
+			// 	for (int i = 0; i <= rs.NumRoots/2; i++) {
+			// 		printf(" %i", rs.ErrorMagPoly[i]);
+			// 	}
+			// 	printf("\r\n          RS Gen Poly:");
+			// 	for (int i = 0; i < rs.NumRoots+1; i++) {
+			// 		printf(" %i", rs.Genpoly[i]);
+			// 	}
+			// }
 		}
 	}
 

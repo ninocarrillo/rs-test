@@ -13,7 +13,7 @@
 #include "gf2_def_struct.h"
 
 // Change to suit your application. Bigger = more memory allocated.
-#define MAX_GENPOLY_ROOTS 32
+#define MAX_GENPOLY_ROOTS 256
 
 typedef struct {
     GF2_def_struct *GF;

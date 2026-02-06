@@ -178,28 +178,86 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 	rs->BlockSize = block_size;
 	rs->DataBlock = data_block;
     
+    // For clarity, the core operations of the decoder are split into
+    // separate functions. Intermediate process results are stored in
+    // RS2_def_struct 'rs'
+
+    // Calculate the Syndrome Polynomial
+    // Inputs:
+    //        rs.GF
+    //        rs.DataBlock[]
+    //        rs.BlockSize
+    //        rs.Genpoly[]
+    //        rs.FirstRoot
+    //        rs.Numroots
+    // Outputs:
+    //       rs.Syndromes[]
 	calc_syndromes(rs);
 	
+	// Perform the Berlekamp algorithm to create the Error Locator Polynomial
+	// Inputs:
+	//        rs.GF
+	//        rs.Numroots
+	//        rs.Syndromes[]
+	// Outputs:
+	//        rs.ErrorLocatorPolynomial[]
 	calc_berlekamp(rs);
 	
+	// Find the roots of the Error Locator Polynomial via the Chien search
+	// Inputs:
+	//        rs.GF
+	//        rs.Numroots
+	//        rs.FieldOrder
+	//        rs.BlockSize
+	//        rs.ErrorLocatorPoly[]
+	// Outputs:
+	//        rs.ErrorCount
+	//        rs.ErrorIndices[]
+	//        rs.ErrorLocatorRoots[]
 	calc_chien(rs);
 
+	// Calculate the Error Magnitude Polynomial as the product of the 
+	// Error Locator Polynomial and Syndrome Polynomial
+	// Inputs:
+	//        rs.GF
+	//        rs.ErrorCount
+	//        rs.Syndromes[]
+	//        rs.ErrorLocatorPoly[]
+	// Outputs:
+	//        rs.ErrorMagPoly[]
 	calc_error_value_poly(rs);
 
+	// Calculate the Error Magnitudes using the Forney algorithm
+	// Inputs:
+	//        rs.GF
+	//        rs.ErrorCount
+	//        rs.ErrorMagPoly[]
+	//        rs.ErrorLocatorPoly[]
+	//        rs.ErrorLocatorRoots[]
+	// Outputs:
+	//        rs.ErrorMags[]
 	calc_forney(rs);
 
+	// Apply corrections to the received data block
 	for (int i = 0; i < rs->ErrorCount; i++) {
 		// Correct each detected error
 		data_block[rs->ErrorIndices[i]] = data_block[rs->ErrorIndices[i]] ^ rs->ErrorMags[i];
 	}
 
+	// Save the pre-correction syndromes
+	// Inputs:
+	//         rs.Syndromes[]
+	// Outputs:
+	//         rs.SavedSyndromes[]
 	save_syndromes(rs);
 
-	// check for success by calculating syndromes (should be zero if no errors)
+	// Check for success by calculating syndromes (should be zero if no errors)
 	int nonzero = calc_syndromes(rs);
 	
 	if (nonzero) {
+		// Decoder indicates failure
 		return -nonzero;
 	}
+	// Decoder indicates success
 	return rs->ErrorCount; // return number of errors corrected    
 }
