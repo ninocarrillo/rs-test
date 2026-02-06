@@ -67,19 +67,19 @@ void save_syndromes(RS2_def_struct *rs) {
 }
 
 void calc_berlekamp(RS2_def_struct *rs) {
-    int next_poly[MAX_GENPOLY_ROOTS];
-    int correction_poly[MAX_GENPOLY_ROOTS];
-	for (int i = 0; i <  rs->NumRoots; i++) {
+    int next_poly[MAX_GENPOLY_ROOTS+1];
+    int correction_poly[MAX_GENPOLY_ROOTS+1];
+	for (int i = 0; i < rs->NumRoots; i++) {
 		rs->ErrorLocatorPoly[i] = 0;
 	}	
 	rs->ErrorLocatorPoly[0] = 1;
 	int order_tracker = 0;
-	for (int i = 0; i < rs->NumRoots; i++) {
+	for (int i = 0; i <= rs->NumRoots; i++) {
 		next_poly[i] = 0;
 		correction_poly[i] = 0;
 	}
 	correction_poly[1] = 1;
-	for (int step_factor = 1; step_factor <= rs->NumRoots; step_factor++) {
+	for (int step_factor = 1; step_factor < (rs->NumRoots+1); step_factor++) {
         // first calculate error value, e
 		int y = step_factor - 1;
 		int e = rs->Syndromes[y];
