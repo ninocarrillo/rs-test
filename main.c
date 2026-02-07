@@ -69,6 +69,22 @@ int main(int arg_count, char* arg_values[]) {
 	if (arg_count < 6) {
 		printf("Not enough arguments.\r\n");
 		printf("Usage:\r\nrs-test <gf poly> <rs first root> <block size> <message size> <runs>\r\n");
+		printf("\r\nExample: rs-test 285 0 255 239 1000");
+		printf("\r\n\n     gf poly:");
+		printf("\r\n              Integer number representing the Galois Field reducing polynomial, in GF(2).");
+		printf("\r\n              The specified polynomial also defines the Galois Field element size. ");
+		printf("\r\n              For example, x^8+x^4+x^3+x^2+1 is represented as 285, and valid for GF(2^8).");
+		printf("\r\n\n     rs first root:");
+		printf("\r\n              Integer number, typically 0 or 1, sometimes called First Consecutive Root");
+		printf("\r\n              or FCR in literature.");
+		printf("\r\n\n     block size:");
+		printf("\r\n              The number of elements in the data block, including parity. Sometimes called");
+		printf("\r\n              'n' in literature.");
+		printf("\r\n\n     message size:");
+		printf("\r\n              The number of payload message elements in the data block. Sometimes called");
+		printf("\r\n              'k' in literature. The number of parity symbols computed per block is n-k.");
+		printf("\r\n");
+
 		return(-1);
 	}
 
@@ -76,29 +92,23 @@ int main(int arg_count, char* arg_values[]) {
 	int rs_first_root = atoi(arg_values[2]);
 	int block_size = atoi(arg_values[3]);
 	int message_size = atoi(arg_values[4]);
-	int parity_size = block_size - message_size;
 	int run_count = atoi(arg_values[5]);
+	int parity_size = block_size - message_size;
 
-	printf("\r\nSize of int variable is %li bits.", sizeof(int)*8);
+
+
 	
 	// Initialize Galois Field.
 	GF2_def_struct gf;
 	int gf_status = InitGF2(gf_poly, &gf);
-	printf("\r\nGalois Field Table, order %i:\r\n", gf.Order);
-	for (int i = 0; i < (gf.Order-1); i++) {
-		printf("%i ", gf.Table[i]);
-	}
 	if (gf_status > 0) {
-		printf("\r\nGalois Field generator polynomial is not irreducible, field repeated %i times.", gf_status);
+		printf("\r\nGalois Field generator polynomial %i is not irreducible, field repeated %i times.\r\n", gf_poly, gf_status);
 		return(-1);
 	} else if (gf_status < 0) {
-		printf("\r\nGalois Field generator polynomial is even, must be odd.");
+		printf("\r\nGalois Field generator polynomial %i is even, must be odd.\r\n", gf_poly);
 		return(-1);
 	} else {
-		printf("\r\nGalois Field generator polynomial is irreducible.");
 	}
-	printf("\r\nGalois Field order: %i", gf.Order);
-	printf("\r\nGalois Field power: %i", gf.Power);
 	
 	if (block_size > (gf.Order - 1)) {
 		printf("\r\nBlock size %i is too large. Must be less than field order %i.\r\n", block_size, gf.Order);
@@ -110,13 +120,30 @@ int main(int arg_count, char* arg_values[]) {
 		return(-1);
 	}
 
+	printf("\r\nGalois Field generator polynomial %i is irreducible.", gf_poly);
+	printf("\r\nGalois Field contains %i elements.", gf.Order);
+	printf("\r\nGalois Field element size si %i bits.", gf.Power);
 
+	printf("\r\nGalois Field Table:");
+	for (int i = 0; i < gf.Order; i++) {
+		if ((i % 16) == 0) {
+			printf("\r\n");
+		}
+		if (i == 0) {
+			printf("%5i", 0);
+		} else {
+			printf("%5i", gf.Table[i-1]);
+		}
+	}
+
+
+	printf("\r\nSize of int variable is %li bits.", sizeof(int)*8);
 	
 	RS2_def_struct rs;
 	rs.GF = &gf;
 	InitRS2(rs_first_root, parity_size, &rs);
 
-	printf("\r\nRS Genpoly: ");
+	printf("\r\nReed Solomon Generator Polynomial, highest coefficient first:\r\n");
 	for(int i = 0; i < rs.NumRoots + 1; i++){
 		printf("%i ", rs.Genpoly[i]);
 	}
