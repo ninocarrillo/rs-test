@@ -3,7 +3,7 @@
 #include "gf2.h"
 #include "rs2.h"
 
-#define MAX_BUFFER 2000
+#define MAX_BUFFER MAX_FIELD_SIZE
 
 void GenRandomMessage(int *buffer, int mask, int size) {
 	for (int i = 0; i < size; i++) {
@@ -68,15 +68,15 @@ int main(int arg_count, char* arg_values[]) {
 	
 	if (arg_count < 6) {
 		printf("Not enough arguments.\r\n");
-		printf("Usage:\r\nrs-test <gf poly> <message size> <block size> <rs first root> <runs>\r\n");
+		printf("Usage:\r\nrs-test <gf poly> <rs first root> <block size> <message size> <runs>\r\n");
 		return(-1);
 	}
 
 	int gf_poly = atoi(arg_values[1]);
-	int message_size = atoi(arg_values[2]);
+	int rs_first_root = atoi(arg_values[2]);
 	int block_size = atoi(arg_values[3]);
+	int message_size = atoi(arg_values[4]);
 	int parity_size = block_size - message_size;
-	int rs_first_root = atoi(arg_values[4]);
 	int run_count = atoi(arg_values[5]);
 
 	printf("\r\nSize of int variable is %li bits.", sizeof(int)*8);
