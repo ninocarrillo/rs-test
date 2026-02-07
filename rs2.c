@@ -48,9 +48,29 @@ int calc_syndromes(RS2_def_struct *rs) {
 	int nonzero = 0; // Count how many non-zero syndromes are calculated.
 	for (int i = 0; i < rs->NumRoots; i++) {
 		rs->Syndromes[i] = 0;
-        int x = GF2Pow(GF2Mod(rs->FirstRoot + i, rs->GF), rs->GF);
+        int gp_root = GF2Pow(GF2Mod(rs->FirstRoot + i, rs->GF), rs->GF);
 		for (int j = 0; j < rs->BlockSize - 1; j++) {
-			rs->Syndromes[i] = GF2Mul(rs->Syndromes[i] ^ rs->DataBlock[j], x, rs->GF);
+			rs->Syndromes[i] = GF2Mul(rs->Syndromes[i] ^ rs->DataBlock[j], gp_root, rs->GF);
+		}
+		rs->Syndromes[i] = rs->Syndromes[i] ^ rs->DataBlock[rs->BlockSize - 1];
+		if (rs->Syndromes[i]) {
+			nonzero++;// Count how many non-zero syndromes are calculated.
+		}
+	}
+	return nonzero;
+}
+
+int calc_syndromes2(RS2_def_struct *rs) {
+	// Calculate one syndrome for each root of rs->GenPoly.
+	// Each syndrome is the evaluation of the message polynomial at a root of rs->GenPoly
+	int nonzero = 0; // Count how many non-zero syndromes are calculated.
+	for (int i = 0; i < rs->NumRoots; i++) {
+		rs->Syndromes[i] = 0;
+        int gp_root = GF2Mod(rs->FirstRoot + i, rs->GF);
+        int exponent = rs->BlockSize - 1;
+		for (int j = 0; j < rs->BlockSize - 1; j++) {
+			rs->Syndromes[i] ^= GF2Mul(rs->DataBlock[j], GF2Pow(GF2Mod(gp_root * exponent, rs->GF), rs->GF), rs->GF);
+			exponent--;
 		}
 		rs->Syndromes[i] = rs->Syndromes[i] ^ rs->DataBlock[rs->BlockSize - 1];
 		if (rs->Syndromes[i]) {
@@ -79,13 +99,11 @@ void calc_berlekamp(RS2_def_struct *rs) {
 		correction_poly[i] = 0;
 	}
 	correction_poly[1] = 1;
-	for (int step_factor = 1; step_factor < (rs->NumRoots+1); step_factor++) {
+	for (int step_factor = 0; step_factor < rs->NumRoots; step_factor++) {
         // first calculate error value, e
-		int y = step_factor - 1;
-		int e = rs->Syndromes[y];
+		int e = rs->Syndromes[step_factor];
 		for (int i = 1; i <= order_tracker; i++) {
-			int x = y - i;
-			e = e ^ GF2Mul(rs->ErrorLocatorPoly[i], rs->Syndromes[x], rs->GF);
+			e ^= GF2Mul(rs->ErrorLocatorPoly[i], rs->Syndromes[step_factor - i], rs->GF);
 		}
         // now update the estimate of the error locator polynomial
 		if (e != 0) {
@@ -101,10 +119,10 @@ void calc_berlekamp(RS2_def_struct *rs) {
 				rs->ErrorLocatorPoly[i] = error_locator_approx[i];
 			}
 		}
-		if ((2 * order_tracker) < step_factor) {
-			order_tracker = step_factor - order_tracker;
+		if ((2 * order_tracker) < (step_factor + 1)) {
+			order_tracker = (step_factor + 1) - order_tracker;
 		}
-        // multiply error_value_poly by x (increase power by one)
+        // multiply correction_poly by x (increase power by one)
 		for (int i = rs->NumRoots; i > 0; i--) {
 			correction_poly[i] = correction_poly[i - 1];
 		}
@@ -192,7 +210,7 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
     //        rs.Numroots
     // Outputs:
     //       rs.Syndromes[]
-	calc_syndromes(rs);
+	int s = calc_syndromes(rs);
 	
 	// Perform the Berlekamp algorithm to create the Error Locator Polynomial
 	// Inputs:

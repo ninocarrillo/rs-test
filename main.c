@@ -195,10 +195,19 @@ int main(int arg_count, char* arg_values[]) {
 				// }				
 			}
 			if ((errors > 0) && (error_count <= parity_size/2)) {
+			//if (corrected_count > 0) {
 				
+				printf("\r\n          Original Message, Encoded:");
+				for (int i = 0; i < block_size; i++) {
+					printf(" %i", original_message[i]);
+				}
 				printf("\r\n          Actual Error Vector:");
 				for (int i = 0; i < block_size; i++) {
 					printf(" %i", error_vector[i]);
+				}
+				printf("\r\n          Corrupt Message:");
+				for (int i = 0; i < block_size; i++) {
+					printf(" %i", corrupt_message[i]);
 				}
 				printf("\r\n          Syndromes:");
 				for (int i = 0; i < rs.NumRoots; i++) {
@@ -224,10 +233,10 @@ int main(int arg_count, char* arg_values[]) {
 				for (int i = 0; i <= rs.NumRoots/2; i++) {
 					printf(" %i", rs.ErrorMagPoly[i]);
 				}
-				printf("\r\n          RS Gen Poly:");
-				for (int i = 0; i < rs.NumRoots+1; i++) {
-					printf(" %i", rs.Genpoly[i]);
-				}
+				// printf("\r\n          RS Gen Poly:");
+				// for (int i = 0; i < rs.NumRoots+1; i++) {
+				// 	printf(" %i", rs.Genpoly[i]);
+				// }
 			}
 		}
 	}
