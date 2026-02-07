@@ -59,17 +59,11 @@ int CompareVectors(int *a, int *b, int size) {
 }
 
 int main(int arg_count, char* arg_values[]) {
-
-	printf("\n");
-	for(int i = 0; i < arg_count; i++) {
-		printf("%s ", arg_values[i]);
-	}
-	printf("\n");
 	
-	if (arg_count < 6) {
+	if (arg_count < 7) {
 		printf("Not enough arguments.\r\n");
-		printf("Usage:\r\nrs-test <gf poly> <rs first root> <block size> <message size> <runs>\r\n");
-		printf("\r\nExample: rs-test 285 0 255 239 1000");
+		printf("Usage:\r\nrs-test <gf poly> <rs first root> <block size> <message size> <runs> <seed>\r\n");
+		printf("\r\nExample: rs-test 285 0 255 239 1000 0");
 		printf("\r\n\n     gf poly:");
 		printf("\r\n              Integer number representing the Galois Field reducing polynomial, in GF(2).");
 		printf("\r\n              The specified polynomial also defines the Galois Field element size. ");
@@ -78,11 +72,18 @@ int main(int arg_count, char* arg_values[]) {
 		printf("\r\n              Integer number, typically 0 or 1, sometimes called First Consecutive Root");
 		printf("\r\n              or FCR in literature.");
 		printf("\r\n\n     block size:");
-		printf("\r\n              The number of elements in the data block, including parity. Sometimes called");
+		printf("\r\n              Integer number of elements in the data block, including parity. Sometimes called");
 		printf("\r\n              'n' in literature.");
 		printf("\r\n\n     message size:");
-		printf("\r\n              The number of payload message elements in the data block. Sometimes called");
+		printf("\r\n              Integer number of payload message elements in the data block. Sometimes called");
 		printf("\r\n              'k' in literature. The number of parity symbols computed per block is n-k.");
+		printf("\r\n\n     runs:");
+		printf("\r\n              Integer number of random test cases to perform at each error count. The program");
+		printf("\r\n              will generate a random message of specified length for each run, and corrupt");
+		printf("\r\n              the message with a precise number of random errors in random locations.");
+		printf("\r\n              Error count will span from zero to (n-k).");
+		printf("\r\n\n     seed:");
+		printf("\r\n              Integer number used to seed random number generator, for test repeatability.");
 		printf("\r\n");
 
 		return(-1);
@@ -93,10 +94,9 @@ int main(int arg_count, char* arg_values[]) {
 	int block_size = atoi(arg_values[3]);
 	int message_size = atoi(arg_values[4]);
 	int run_count = atoi(arg_values[5]);
+	int seed = atoi(arg_values[6]);
 	int parity_size = block_size - message_size;
-
-
-
+	srand(seed);
 	
 	// Initialize Galois Field.
 	GF2_def_struct gf;
@@ -122,7 +122,7 @@ int main(int arg_count, char* arg_values[]) {
 
 	printf("\r\nGalois Field generator polynomial %i is irreducible.", gf_poly);
 	printf("\r\nGalois Field contains %i elements.", gf.Order);
-	printf("\r\nGalois Field element size si %i bits.", gf.Power);
+	printf("\r\nGalois Field element size is %i bits.", gf.Power);
 
 	printf("\r\nGalois Field Table:");
 	for (int i = 0; i < gf.Order; i++) {
