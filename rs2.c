@@ -1,6 +1,5 @@
 #include "rs2.h"
 #include "gf2.h"
-#include <stdio.h>
 
 void InitRS2(int first_root, int num_roots, RS2_def_struct *rs) {
     rs->FirstRoot = first_root;

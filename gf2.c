@@ -1,5 +1,4 @@
 #include "gf2.h"
-#include <stdio.h>
 
 void lfsr_step(GF2_def_struct *gf) {
 // utilize Galois configuration to implement LFSR
