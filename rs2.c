@@ -105,6 +105,7 @@ void calc_berlekamp(RS2_def_struct *rs) {
 		for (int i = 1; i <= order_tracker; i++) {
 			e ^= GF2Mul(rs->ErrorLocatorPoly[i], rs->Syndromes[step_factor - i], rs->GF);
 		}
+		printf("\r\n               e: %i", e);
         // now update the estimate of the error locator polynomial
 		if (e != 0) {
 			for (int i = 0; i <= order_tracker; i++) {
@@ -127,6 +128,52 @@ void calc_berlekamp(RS2_def_struct *rs) {
 			correction_poly[i] = correction_poly[i - 1];
 		}
 		correction_poly[0] = 0;
+	}
+	printf("\r\n                  Order Tracker: %i", order_tracker);
+}
+
+
+void calc_berlekamp2(RS2_def_struct *rs) {
+	int B[MAX_GENPOLY_ROOTS];
+	int T[MAX_GENPOLY_ROOTS];
+	for (int i = 0; i < MAX_GENPOLY_ROOTS; i++) {
+		rs->ErrorLocatorPoly[i] = 0;
+		B[i] = 0;
+		T[i] = 0;
+	}
+	rs->ErrorLocatorPoly[0] = 1;
+	B[0] = 1;
+	int L = 0;
+	int m = 1;
+	int b = 1;
+
+	for (int n = 0; n < rs->NumRoots; n++) {
+		// Calculate discrepancy
+		int d = rs->Syndromes[n];
+		for (int i = 1; i <= L; i++) {
+			d ^= GF2Mul(rs->ErrorLocatorPoly[i], rs->Syndromes[n - i], rs->GF);
+		}
+		if (d == 0) {
+			m++;
+		} else if ((2 * L) <= n) {
+			for (int i = 0; i < rs->NumRoots; i++) {
+				T[i] = rs->ErrorLocatorPoly[i];
+			}
+			for (int i = m; i < rs->NumRoots; i++) {
+				rs->ErrorLocatorPoly[i] ^= GF2Mul(GF2Mul(d, GF2Inv(b, rs->GF), rs->GF), B[i - m], rs->GF);
+			}
+			L = (n + 1) - L;
+			for (int i = 0; i < rs->NumRoots; i++) {
+				B[i] = T[i];
+			}
+			b = d;
+			m = 1;
+		} else {
+			for (int i = m; i < rs->NumRoots; i++) {
+				rs->ErrorLocatorPoly[i] ^= GF2Mul(GF2Mul(d, GF2Inv(b, rs->GF), rs->GF), B[i - m], rs->GF);
+			}
+			m++;
+		}
 	}
 }
 
@@ -219,7 +266,7 @@ int RSDecode(int *data_block, int block_size, RS2_def_struct *rs) {
 	//        rs.Syndromes[]
 	// Outputs:
 	//        rs.ErrorLocatorPolynomial[]
-	calc_berlekamp(rs);
+	calc_berlekamp2(rs);
 	
 	// Find the roots of the Error Locator Polynomial via the Chien search
 	// Inputs:
