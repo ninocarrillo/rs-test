@@ -86,53 +86,6 @@ void save_syndromes(RS2_def_struct *rs) {
 	}
 }
 
-void calc_berlekamp(RS2_def_struct *rs) {
-    int error_locator_approx[MAX_GENPOLY_ROOTS+1];
-    int correction_poly[MAX_GENPOLY_ROOTS+1];
-	for (int i = 0; i < rs->NumRoots; i++) {
-		rs->ErrorLocatorPoly[i] = 0;
-	}	
-	rs->ErrorLocatorPoly[0] = 1;
-	int order_tracker = 0;
-	for (int i = 0; i <= rs->NumRoots; i++) {
-		error_locator_approx[i] = 0;
-		correction_poly[i] = 0;
-	}
-	correction_poly[1] = 1;
-	for (int step_factor = 0; step_factor < rs->NumRoots; step_factor++) {
-        // first calculate error value, e
-		int e = rs->Syndromes[step_factor];
-		for (int i = 1; i <= order_tracker; i++) {
-			e ^= GF2Mul(rs->ErrorLocatorPoly[i], rs->Syndromes[step_factor - i], rs->GF);
-		}
-		printf("\r\n               e: %i", e);
-        // now update the estimate of the error locator polynomial
-		if (e != 0) {
-			for (int i = 0; i <= order_tracker; i++) {
-				error_locator_approx[i] = rs->ErrorLocatorPoly[i] ^ GF2Mul(e, correction_poly[i], rs->GF);
-			}
-            // and update the value of the correction polynomial
-			e = GF2Inv(e, rs->GF);
-			for (int i = 0; i <= rs->NumRoots; i++) {
-				correction_poly[i] = GF2Mul(rs->ErrorLocatorPoly[i], e, rs->GF);
-			}
-			for (int i = 0; i <= rs->NumRoots; i++) {
-				rs->ErrorLocatorPoly[i] = error_locator_approx[i];
-			}
-		}
-		if ((2 * order_tracker) < (step_factor + 1)) {
-			order_tracker = (step_factor + 1) - order_tracker;
-		}
-        // multiply correction_poly by x (increase power by one)
-		for (int i = rs->NumRoots; i > 0; i--) {
-			correction_poly[i] = correction_poly[i - 1];
-		}
-		correction_poly[0] = 0;
-	}
-	printf("\r\n                  Order Tracker: %i", order_tracker);
-}
-
-
 void calc_berlekamp2(RS2_def_struct *rs) {
 	int B[MAX_GENPOLY_ROOTS];
 	int T[MAX_GENPOLY_ROOTS];
