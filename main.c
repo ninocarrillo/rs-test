@@ -127,20 +127,21 @@ int main(int arg_count, char* arg_values[]) {
 	int corrupt_message[MAX_BUFFER];
 	int decoded_message[MAX_BUFFER];
 
-	int decoder_indicated_failures[parity_size+1];
-	int failures[parity_size+1];
-	int undetected_failures[parity_size+1];
-	int successes[parity_size+1];
-	for (int i = 0; i <= parity_size; i++) {
+	int decoder_indicated_failures[MAX_FIELD_SIZE];
+	int failures[MAX_FIELD_SIZE];
+	int undetected_failures[MAX_FIELD_SIZE];
+	int successes[MAX_FIELD_SIZE];
+	for (int i = 0; i <= MAX_FIELD_SIZE; i++) {
 		failures[i] = 0;
 		undetected_failures[i] = 0;
 		successes[i] = 0;
 		decoder_indicated_failures[i] = 0;
 	}
 
-	printf("\r\nStarting %i runs.\r\n", (parity_size + 1) * run_count);
-	int master_count = 1;
 	int max_errors = parity_size;
+
+	printf("\r\nStarting %i runs.\r\n", (max_errors + 1) * run_count);
+	int master_count = 1;
 	
 	for (int error_count = 0; error_count <= max_errors; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
