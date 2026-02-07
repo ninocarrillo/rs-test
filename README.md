@@ -1,2 +1,133 @@
 # rs-test
-Reed Solomon encoder/decoder and boundary failure tests
+Reed Solomon encoder/decoder and boundary failure tests. Repository contains example Reed Solomon encoder and decoder, including Galois Field arithmetic functions.
+# Requirements
+gcc or other c compiler stdlib and stdio
+# Compiling
+Recommend make a directory for the compiled binary, to easily exclude the binary from git commits.
+```
+mkdir bin
+gcc -o bin/rs-test *.c
+```
+# Usage
+```
+rs-test <gf poly> <rs first root> <block size> <message size> <runs> <seed>
+```
+## Arguments
+### gf poly 
+Integer number representing the Galois Field reducing polynomial, in GF(2). The specified polynomial also defines the Galois Field element size. For example, x^8+x^4+x^3+x^2+1 is represented as 285, and valid for GF(2^8).
+### rs first root
+Integer number, typically 0 or 1, sometimes called First Consecutive Root or FCR in literature.
+### block size
+Integer number of elements in the data block, including parity. Sometimes called 'n' in literature.
+### message size
+Integer number of payload message elements in the data block. Sometimes called 'k' in literature. The number of parity symbols computed per block is n-k.
+### runs
+Integer number of random test cases to perform at each error count. The program will generate a random message of specified length for each run, and corrupt the message with a precise number of random errors in random locations. Error count will span from zero to (n-k).
+### seed
+Integer number used to seed random number generator, for test repeatability.
+# Invoke Example with Arguments
+```
+bin/rs-test 285 0 255 239 1000 0
+```
+## Example Output
+```
+Galois Field generator polynomial 285 is irreducible.
+Galois Field contains 256 elements.
+Galois Field element size is 8 bits.
+Galois Field Table:
+    0    1    2    4    8   16   32   64  128   29   58  116  232  205  135   19
+   38   76  152   45   90  180  117  234  201  143    3    6   12   24   48   96
+  192  157   39   78  156   37   74  148   53  106  212  181  119  238  193  159
+   35   70  140    5   10   20   40   80  160   93  186  105  210  185  111  222
+  161   95  190   97  194  153   47   94  188  101  202  137   15   30   60  120
+  240  253  231  211  187  107  214  177  127  254  225  223  163   91  182  113
+  226  217  175   67  134   17   34   68  136   13   26   52  104  208  189  103
+  206  129   31   62  124  248  237  199  147   59  118  236  197  151   51  102
+  204  133   23   46   92  184  109  218  169   79  158   33   66  132   21   42
+   84  168   77  154   41   82  164   85  170   73  146   57  114  228  213  183
+  115  230  209  191   99  198  145   63  126  252  229  215  179  123  246  241
+  255  227  219  171   75  150   49   98  196  149   55  110  220  165   87  174
+   65  130   25   50  100  200  141    7   14   28   56  112  224  221  167   83
+  166   81  162   89  178  121  242  249  239  195  155   43   86  172   69  138
+    9   18   36   72  144   61  122  244  245  247  243  251  235  203  139   11
+   22   44   88  176  125  250  233  207  131   27   54  108  216  173   71  142
+Size of int variable is 32 bits.
+Reed Solomon Generator Polynomial, highest coefficient first:
+59 36 50 98 229 41 65 163 8 30 209 68 189 104 13 59 1 
+
+Starting 1700 runs.
+1700
+Decode Success by Error Count:
+0, 100
+1, 100
+2, 100
+3, 100
+4, 100
+5, 100
+6, 100
+7, 100
+8, 100
+9, 0
+10, 0
+11, 0
+12, 0
+13, 0
+14, 0
+15, 0
+16, 0
+Decoder Indicated Failures by Error Count:
+0, 0
+1, 0
+2, 0
+3, 0
+4, 0
+5, 0
+6, 0
+7, 0
+8, 0
+9, 100
+10, 100
+11, 100
+12, 100
+13, 100
+14, 100
+15, 100
+16, 100
+Actual Decode Failures by Error Count:
+0, 0
+1, 0
+2, 0
+3, 0
+4, 0
+5, 0
+6, 0
+7, 0
+8, 0
+9, 100
+10, 100
+11, 100
+12, 100
+13, 100
+14, 100
+15, 100
+16, 100
+Undetected Decode Failures by Error Count:
+0, 0
+1, 0
+2, 0
+3, 0
+4, 0
+5, 0
+6, 0
+7, 0
+8, 0
+9, 0
+10, 0
+11, 0
+12, 0
+13, 0
+14, 0
+15, 0
+16, 0
+Done.
+```
