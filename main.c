@@ -65,10 +65,10 @@ int CompareVectors(int *a, int *b, int size) {
 
 int main(int arg_count, char* arg_values[]) {
 	
-	if (arg_count < 7) {
+	if (arg_count < 8) {
 		printf("Not enough arguments.\r\n");
-		printf("Usage:\r\nrs-test <gf poly> <rs first root> <block size> <message size> <runs> <seed>\r\n");
-		printf("\r\nExample: rs-test 285 0 255 239 1000 0");
+		printf("Usage:\r\nrs-test <gf poly> <rs first root> <block size> <message size> <max error count> <runs> <seed>\r\n");
+		printf("\r\nExample: rs-test 285 0 15 13 7 100000 0");
 		printf("\r\n\n     gf poly:");
 		printf("\r\n              Integer number representing the Galois Field reducing polynomial, in GF(2).");
 		printf("\r\n              The specified polynomial also defines the Galois Field element size. ");
@@ -82,6 +82,8 @@ int main(int arg_count, char* arg_values[]) {
 		printf("\r\n\n     message size:");
 		printf("\r\n              Integer number of payload message elements in the data block. Sometimes called");
 		printf("\r\n              'k' in literature. The number of parity symbols computed per block is n-k.");
+		printf("\r\n       max error count:");
+		printf("\r\n               Maximum number of errors per block.");
 		printf("\r\n\n     runs:");
 		printf("\r\n              Integer number of random test cases to perform at each error count. The program");
 		printf("\r\n              will generate a random message of specified length for each run, and corrupt");
@@ -98,8 +100,9 @@ int main(int arg_count, char* arg_values[]) {
 	int rs_first_root = atoi(arg_values[2]);
 	int block_size = atoi(arg_values[3]);
 	int message_size = atoi(arg_values[4]);
-	int run_count = atoi(arg_values[5]);
-	int seed = atoi(arg_values[6]);
+	int max_errors = atoi(arg_values[5]);
+	int run_count = atoi(arg_values[6]);
+	int seed = atoi(arg_values[7]);
 	int parity_size = block_size - message_size;
 	srand(seed);
 	
@@ -124,6 +127,16 @@ int main(int arg_count, char* arg_values[]) {
 		printf("\r\nMessage size %i is too large. Must be less than block size %i.\r\n", message_size, block_size);
 		return(-1);
 	}
+
+	if (max_errors >= block_size) {
+		printf("\r\nMax error count %i is too large. Must be less than block size %i.\r\n", max_errors, block_size);
+		return(-1);
+	}
+	if (max_errors < 1) {
+		printf("\r\nMax error count %i is too small. Must be greater than zero.\r\n", max_errors);
+		return(-1);
+	}
+	
 
 	printf("\r\nGalois Field generator polynomial %i is irreducible.", gf_poly);
 	printf("\r\nGalois Field contains %i elements.", gf.Order);
@@ -172,8 +185,6 @@ int main(int arg_count, char* arg_values[]) {
 		decoder_indicated_failures[i] = 0;
 		artificial_codewords[i] = 0;
 	}
-
-	int max_errors = parity_size;
 
 	printf("\r\nStarting %i runs.\r\n", (max_errors + 1) * run_count);
 	int master_count = 1;
