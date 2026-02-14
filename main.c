@@ -221,7 +221,7 @@ int main(int arg_count, char* arg_values[]) {
 			CopyMessage(corrupt_message, reencoded_message, message_size);
 			RSEncode(reencoded_message, message_size, &rs);
 			// Check if the randomly corrupted message is also a valid codeword
-			if (CompareVectors(corrupt_message, reencoded_message, block_size) == 0) {
+			if ((CompareVectors(corrupt_message, reencoded_message, block_size) == 0) && (error_count > 1)) {
 				artificial_codewords[error_count]++;
 			}
 
