@@ -128,8 +128,8 @@ int main(int arg_count, char* arg_values[]) {
 		return(-1);
 	}
 
-	if (max_errors >= block_size) {
-		printf("\r\nMax error count %i is too large. Must be less than block size %i.\r\n", max_errors, block_size);
+	if (max_errors > block_size) {
+		printf("\r\nMax error count %i is too large. Must be less than or equal to block size %i.\r\n", max_errors, block_size);
 		return(-1);
 	}
 	if (max_errors < 1) {
