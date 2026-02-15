@@ -186,13 +186,23 @@ int main(int arg_count, char* arg_values[]) {
 		artificial_codewords[i] = 0;
 	}
 
-	printf("\r\nStarting %i runs.\r\n", (max_errors + 1) * run_count);
+	printf("\r\nStarting %i trials.", (max_errors + 1) * run_count);
 	int master_count = 1;
+	int prog_bar_segs = 40;
+	int print_interval = ((max_errors + 1) * run_count) / prog_bar_segs;
+	printf("\r\n");
+	for (int i = 0; i <= prog_bar_segs; i++) {
+		printf(" ");
+	}
+	printf("]\r[");
 	
 	for (int error_count = 0; error_count <= max_errors; error_count++) {
 		for (int run_number = 1; run_number <= run_count; run_number++) {
 			// printf("\r\n\nError Count %i, Run %i, ", error_count, run_number);
-			printf("\r%i", master_count++);
+			if ((master_count++ % print_interval) == 0 ) {
+				printf("=");
+				fflush(stdout);
+			}	
 			// Generate a random message to encode.
 			GenRandomMessage(original_message, gf.Order - 1, message_size);
 			// printf("\r\nMessage:");
