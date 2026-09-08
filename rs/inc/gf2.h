@@ -11,10 +11,10 @@
 
 #include "stdint.h"
 
-typedef uint8_t GF2_type;
+typedef uint16_t GF2_type;
 
 // Change to suit your application. Bigger = more memory used!
-#define MAX_GF_BITS 8
+#define MAX_GF_BITS 16
 
 // Don't change below this line.
 // MAX_FIELD_SIZE controls how much memory is allocated for tables.
@@ -63,7 +63,7 @@ int GF2Div(int, int, GF2_def_struct*);
 // Arg3: pointer to least significant coefficient of polynomial 2
 // Arg4: number of coefficients in polynomial 2
 // Returns convolved polynomial of length (p1n + p2n - 1).
-int GF2Conv(uint8_t*, int, uint8_t*, int, GF2_def_struct*);
+int GF2Conv(GF2_type*, int, GF2_type*, int, GF2_def_struct*);
 
 // GF2Pow
 // Returns field primitive (2) raised to Arg.
