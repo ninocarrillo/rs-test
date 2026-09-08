@@ -11,10 +11,10 @@
 
 #include "stdint.h"
 
-typedef uint16_t GF2_type;
+typedef uint8_t GF2_type;
 
 // Change to suit your application. Bigger = more memory used!
-#define MAX_GF_BITS 16
+#define MAX_GF_BITS 8
 
 // Don't change below this line.
 // MAX_FIELD_SIZE controls how much memory is allocated for tables.
