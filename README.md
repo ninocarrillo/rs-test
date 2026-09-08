@@ -2,11 +2,11 @@
 Reed Solomon encoder/decoder and boundary failure tests. Repository contains example Reed Solomon encoder and decoder, including Galois Field arithmetic functions.
 # Requirements
 gcc or other c compiler stdlib and stdio
+make
 # Compiling
-Recommend make a directory for the compiled binary, to easily exclude the binary from git commits.
 ```
-mkdir bin
-gcc -o bin/rs-test *.c
+make clean
+make
 ```
 # Usage
 ```
