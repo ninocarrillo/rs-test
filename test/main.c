@@ -5,18 +5,18 @@
 
 #define MAX_BUFFER MAX_FIELD_SIZE
 
-void GenRandomMessage(int *buffer, int mask, int size) {
+void GenRandomMessage(GF2_type *buffer, int mask, int size) {
 	for (int i = 0; i < size; i++) {
 		buffer[i] = rand() & mask;
 	}
 }
-void CopyMessage(int *in, int *out, int size) {
+void CopyMessage(GF2_type *in, GF2_type *out, int size) {
 	for (int i = 0; i < size; i++) {
 		out[i] = in[i];
 	}
 }
 
-void GenErrorVector(int *buffer, int mask, int size, int count) {
+void GenErrorVector(GF2_type *buffer, int mask, int size, int count) {
 	int error_locs[MAX_BUFFER];
 	// Clear error buffers
 	for (int i = 0; i < size; i++) {
@@ -47,13 +47,13 @@ void GenErrorVector(int *buffer, int mask, int size, int count) {
 	}
 }
 
-void CombineVectors(int *in1, int *in2, int *out, int count) {
+void CombineVectors(GF2_type *in1, GF2_type *in2, GF2_type *out, int count) {
 	for (int i = 0; i < count; i++) {
 		out[i] = in1[i] ^ in2[i];
 	}
 }
 
-int CompareVectors(int *a, int *b, int size) {
+int CompareVectors(GF2_type *a, GF2_type *b, int size) {
 	int errors = 0;
 	for (int i = 0; i < size; i++) {
 		if (a[i] ^ b[i]) {
@@ -167,11 +167,11 @@ int main(int arg_count, char* arg_values[]) {
 	}
 	printf("\r\n");
 
-	int original_message[MAX_BUFFER];
-	int error_vector[MAX_BUFFER];
-	int corrupt_message[MAX_BUFFER];
-	int decoded_message[MAX_BUFFER];
-	int reencoded_message[MAX_BUFFER];
+	GF2_type original_message[MAX_BUFFER];
+	GF2_type error_vector[MAX_BUFFER];
+	GF2_type corrupt_message[MAX_BUFFER];
+	GF2_type decoded_message[MAX_BUFFER];
+	GF2_type reencoded_message[MAX_BUFFER];
 
 	int decoder_indicated_failures[MAX_FIELD_SIZE];
 	int failures[MAX_FIELD_SIZE];
