@@ -23,7 +23,6 @@ typedef uint8_t GF2_type;
 typedef struct {
     GF2_type Table[MAX_FIELD_SIZE - 1];
     GF2_type Index[MAX_FIELD_SIZE];
-    GF2_type Inverse[MAX_FIELD_SIZE];
     int Power;
     int GenPoly;
     int Order;
@@ -72,10 +71,6 @@ int GF2Pow(int, GF2_def_struct*);
 // GF2Log
 // Returns log base <field primitive> (2) of Arg.
 int GF2Log(int, GF2_def_struct*);
-
-// GF2Inv
-// Returns 1/Arg.
-int GF2Inv(int, GF2_def_struct*);
 
 int GF2Mod(int, GF2_def_struct*);
 int GF2Clamp(int, GF2_def_struct*);

@@ -22,10 +22,6 @@ int GF2Log(int i, GF2_def_struct *gf) {
     return gf->Index[i & gf->Mask];
 }
 
-int GF2Inv(int i, GF2_def_struct *gf) {
-    return gf->Inverse[i & gf->Mask];
-}
-
 int GF2Mod(int i, GF2_def_struct *gf) {
 	while (i < 0) {
 		i += (gf->Order - 1);
@@ -67,14 +63,9 @@ int InitGF2(int genpoly, GF2_def_struct *gf) {
             status++; // number of times sequence repeated during generation
         }
     }
-    if (status == 0) {
-	    gf->Index[0] = 0;
-	    // generate the inverse table
-	    gf->Inverse[0] = 0;
-        for (int i = 1; i < gf->Order; i++) {
-            gf->Inverse[i] = GF2Div(1, i, gf);
-        }
-	}
+
+    gf->Index[0] = 0;
+
     return status;
 }
 

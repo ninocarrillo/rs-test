@@ -114,7 +114,7 @@ void calc_berlekamp2(RS2_def_struct *rs) {
 				T[i] = rs->ErrorLocatorPoly[i];
 			}
 			for (int i = m; i < rs->NumRoots; i++) {
-				rs->ErrorLocatorPoly[i] ^= GF2Mul(GF2Mul(d, GF2Inv(b, rs->GF), rs->GF), B[i - m], rs->GF);
+				rs->ErrorLocatorPoly[i] ^= GF2Mul(GF2Mul(d, GF2Div(1, b, rs->GF), rs->GF), B[i - m], rs->GF);
 			}
 			L = (n + 1) - L;
 			for (int i = 0; i < rs->NumRoots; i++) {
@@ -124,7 +124,7 @@ void calc_berlekamp2(RS2_def_struct *rs) {
 			m = 1;
 		} else {
 			for (int i = m; i < rs->NumRoots; i++) {
-				rs->ErrorLocatorPoly[i] ^= GF2Mul(GF2Mul(d, GF2Inv(b, rs->GF), rs->GF), B[i - m], rs->GF);
+				rs->ErrorLocatorPoly[i] ^= GF2Mul(GF2Mul(d, GF2Div(1, b, rs->GF), rs->GF), B[i - m], rs->GF);
 			}
 			m++;
 		}
@@ -189,7 +189,7 @@ void calc_forney(RS2_def_struct *rs) {
 		}
 		
 		// Take inverse of denominator term so division becomes multiplication.
-		rs->ErrorMags[i] = GF2Mul(GF2Inv(denominator, rs->GF), numerator, rs->GF);
+		rs->ErrorMags[i] = GF2Mul(GF2Div(1, denominator, rs->GF), numerator, rs->GF);
 	}
 }
 
