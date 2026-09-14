@@ -178,7 +178,7 @@ int main(int arg_count, char* arg_values[]) {
 	int undetected_failures[MAX_FIELD_SIZE];
 	int successes[MAX_FIELD_SIZE];
 	int artificial_codewords[MAX_FIELD_SIZE];
-	for (int i = 0; i <= MAX_FIELD_SIZE; i++) {
+	for (int i = 0; i < MAX_FIELD_SIZE; i++) {
 		failures[i] = 0;
 		undetected_failures[i] = 0;
 		successes[i] = 0;

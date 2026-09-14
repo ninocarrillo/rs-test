@@ -71,13 +71,9 @@ int InitGF2(int genpoly, GF2_def_struct *gf) {
 	    gf->Index[0] = 0;
 	    // generate the inverse table
 	    gf->Inverse[0] = 0;
-	    for (int i = 1; i < gf->Order; i++) {
-	        int j = 1;
-	        while (GF2Mul(i, j, gf) != 1) {
-	            j++;
-	        }
-	        gf->Inverse[i] = j;
-	    }
+        for (int i = 1; i < gf->Order; i++) {
+            gf->Inverse[i] = GF2Div(1, i, gf);
+        }
 	}
     return status;
 }
